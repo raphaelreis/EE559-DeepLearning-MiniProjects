@@ -1,0 +1,15 @@
+{
+    "python.pythonPath": "/Users/Raphael/anaconda3/envs/ada/bin/python",
+    "python.linting.pylintArgs": [
+        "--errors-only",
+        "--generated-members=numpy.* ,torch.* ,cv2.* , cv.*, torch.tensor"
+    ],
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.enabled": true,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "python.linting.banditEnabled": true
+}
