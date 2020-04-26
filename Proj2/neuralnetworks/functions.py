@@ -1,43 +1,44 @@
-import math
+###### Only for intellisense ###### noqa: E266
 import torch
-
-
 Tensor = torch.Tensor
+##################################
 
-##################### Linear transformations #####################
-def linear(input, weights, bias=None):
-    # type: (Tensor, Tensor, Optional[Tensor]) -> Tensor
+##################### Linear transformations ##################### noqa: E266
+
+
+def linear(input: Tensor, weights: Tensor, bias: Tensor = None) -> Tensor:
+
     '''Apply a linear transformation to the input.'''
-    
-    output = input.matmul(weights.t())
+
+    output = input.t() @ weights
     if bias is not None:
         output += bias
     return output
 
 
+##################### Activation functions ##################### noqa: E266
 
-##################### Activation functions #####################
-def tanh(input):
-    # type: (Tensor) -> Tensor
+
+def tanh(input: Tensor) -> Tensor:
     '''Hyperbolic tangeant'''
 
     return input.tanh()
 
-def tanh_backward(dA, Z):
-    # type: (Tensor, Tensor) -> Tensor
+
+def tanh_backward(dA: Tensor, Z: Tensor) -> Tensor:
     '''Backward activation function for tanh'''
 
     tanh_squared = Z.tanh().pow(2)
     return (dA - dA.matmul(tanh_squared))
 
-def relu(input):
-    # type: (Tensor) -> Tensor
+
+def relu(input: Tensor) -> Tensor:
     '''Rectified linear unit'''
 
     return input.relu()
 
-def relu_backward(dA, Z):
-    # type: (Tensor, Tensor) -> Tensor
+
+def relu_backward(dA: Tensor, Z: Tensor) -> Tensor:
     '''Backward activation function for relu'''
 
     dZ = dA.clone()
@@ -45,8 +46,9 @@ def relu_backward(dA, Z):
     return dZ
 
 
-######################## Loss functions ########################
-def mse(y_hat, y):
+######################## Loss functions ######################## noqa: E266
+
+def mse(y_hat: Tensor, y: Tensor) -> Tensor:
     '''Mean squared error'''
 
     return (y_hat - y).pow(2).sum()

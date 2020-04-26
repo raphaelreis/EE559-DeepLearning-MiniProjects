@@ -1,8 +1,7 @@
 
 
-
 class Module (object):
-'''Base class of all modules '''
+    '''Base class of all modules '''
 
     def forward(self, *input):
         raise NotImplementedError
@@ -11,4 +10,4 @@ class Module (object):
         raise NotImplementedError
 
     def param(self):
-    return []
+        return []
