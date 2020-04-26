@@ -23,14 +23,30 @@ def tanh(input):
 
     return input.tanh()
 
+def tanh_backward(dA, Z):
+    # type: (Tensor, Tensor) -> Tensor
+    '''Backward activation function for tanh'''
+
+    tanh_squared = Z.tanh().pow(2)
+    return (dA - dA.matmul(tanh_squared))
+
 def relu(input):
     # type: (Tensor) -> Tensor
     '''Rectified linear unit'''
 
     return input.relu()
 
+def relu_backward(dA, Z):
+    # type: (Tensor, Tensor) -> Tensor
+    '''Backward activation function for relu'''
+
+    dZ = dA.clone()
+    dZ[dZ <= 0] = 0
+    return dZ
+
 
 ######################## Loss functions ########################
 def mse(y_hat, y):
     '''Mean squared error'''
+
     return (y_hat - y).pow(2).sum()
