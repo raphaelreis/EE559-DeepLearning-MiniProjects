@@ -48,7 +48,13 @@ def relu_backward(dA: Tensor, Z: Tensor) -> Tensor:
 
 ######################## Loss functions ######################## noqa: E266
 
-def mse(y_hat: Tensor, y: Tensor) -> Tensor:
+def MSE(y_hat: Tensor, y: Tensor) -> Tensor:
     '''Mean squared error'''
 
     return (y_hat - y).pow(2).sum()
+
+
+def MSE_prime(y_hat: Tensor, y: Tensor) -> Tensor:
+    '''Derivative of the mean squared error'''
+
+    return -2 * (y_hat - y)

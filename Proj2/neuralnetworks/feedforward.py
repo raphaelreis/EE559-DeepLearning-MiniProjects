@@ -1,7 +1,11 @@
+import logging
+
 from torch import empty
 
 from .base import Module
 from .functions import linear, relu, relu_backward, tanh, tanh_backward
+
+log = logging.getLogger("TestMLP")
 
 
 class Feedforward(Module):
@@ -26,9 +30,9 @@ class Feedforward(Module):
         if activation == 'relu':
             F = relu
             dF = relu_backward
-        elif activation == 'sigmoid':
-            F = tanh
-            dF = tanh_backward
+        # elif activation == 'tanh':
+        #     F = tanh
+        #     dF = tanh_backward
         else:
             raise Exception("Not implemented activation function")
 
@@ -39,12 +43,23 @@ class Feedforward(Module):
         self.input = A
         self.Z = linear(A, self.W, self.b)
 
-    def backward(self, dA_current):
+    def backward(self, dA_prev, dA_current):
+        log.debug("\n*****BACKWARD*****")
+        log.debug("dA_prev: {}".format(dA_prev))
+        log.debug("dA_current: {}".format(dA_current))
         n = self.input.shape[0]
+
         dZ = self.activation['dF'](dA_current, self.Z)
-        self.dW = (dZ.unsqueeze(1) @ dA_current.unsqueeze(1).t()) / n
-        self.db = dZ / n
-        self.dA_prev = self.dW.t() @ dZ
+        log.debug("dZ shape: {}".format(dZ.shape))
+        log.debug("dA_prev.shape: {}".format(dA_prev.shape))
+        self.dW = (dA_prev.unsqueeze(1) @ dZ.unsqueeze(1).t()) / n
+        log.debug("dW: {}".format(self.dW.shape))
+        self.db = (dZ / n).squeeze()
+        # log.debug("db: {}".format(self.db))
+        log.debug("W shape: {}".format(self.W.shape))
+        # log.debug("dZ shape: {}".format(dZ.shape))
+        self.dA_prev = (self.W @ dZ.unsqueeze(1)).squeeze()
+        # log.debug("dA_prev: {}".format(self.dA_prev))
 
     def get_param(self):
         return ((self.W, self.dW), (self.b, self.db))
