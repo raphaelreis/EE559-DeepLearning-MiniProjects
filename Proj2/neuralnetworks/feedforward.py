@@ -11,16 +11,16 @@ class Feedforward(Module):
         super(Feedforward, self).__init__()
         self.input_features = input_features
         self.output_features = output_features
-        self.weights = empty(input_features, output_features)
+        self.W = empty(input_features, output_features)
         if bias:
-            self.bias = empty(output_features)
+            self.b = empty(output_features)
         self.init_parameters()
         self.activation = self.parse_activation(activation)
 
     def init_parameters(self):
-        self.weights.uniform_()
-        if self.bias is not None:
-            self.bias.uniform_()
+        self.W.uniform_()
+        if self.b is not None:
+            self.b.uniform_()
 
     def parse_activation(self, activation):
         if activation == 'relu':
@@ -37,7 +37,7 @@ class Feedforward(Module):
 
     def forward(self, A):
         self.input = A
-        self.Z = linear(A, self.weights, self.bias)
+        self.Z = linear(A, self.W, self.b)
 
     def backward(self, dA_current):
         n = self.input.shape[0]
@@ -46,5 +46,9 @@ class Feedforward(Module):
         self.db = dZ / n
         self.dA_prev = self.dW.t() @ dZ
 
-    def param(self):
-        return []
+    def get_param(self):
+        return ((self.W, self.dW), (self.b, self.db))
+
+    def set_param(self, W, b):
+        self.W = W
+        self.b = b
