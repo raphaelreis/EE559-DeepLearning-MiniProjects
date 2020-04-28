@@ -11,6 +11,15 @@ log = logging.getLogger("TestFeedforward")
 
 
 class TestPasses(unittest.TestCase):
+    def testSetParameters(self):
+        linear = Feedforward(2, 2)
+        new_weights = empty(2, 2).normal_()
+        new_bias = empty(2).normal_()
+        linear.set_param(new_weights, new_bias)
+        
+        self.assertTrue(linear.W.eq(new_weights).all().item())
+        self.assertTrue(linear.b.eq(new_bias).all().item())
+
     def testSimpleForward(self):
         X = empty(2).normal_()
         linear = Feedforward(2, 2)
