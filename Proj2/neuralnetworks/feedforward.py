@@ -22,9 +22,9 @@ class Feedforward(Module):
         self.activation = self.parse_activation(activation)
 
     def init_parameters(self):
-        self.W.uniform_()
+        self.W.normal_()
         if self.b is not None:
-            self.b.uniform_()
+            self.b.normal_()
 
     def parse_activation(self, activation):
         if activation == 'relu':
