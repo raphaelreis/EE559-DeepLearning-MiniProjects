@@ -20,16 +20,21 @@ def linear(input: Tensor, weights: Tensor, bias: Tensor = None) -> Tensor:
 
 
 def tanh(input: Tensor) -> Tensor:
-    '''Hyperbolic tangeant'''
+    '''Hyperbolic tangent'''
 
     return input.tanh()
 
 
-def tanh_backward(dA: Tensor, Z: Tensor) -> Tensor:
-    '''Backward activation function for tanh'''
+def sigmoid(input: Tensor) -> Tensor:
+    '''Sigmoid function'''
 
-    tanh_squared = Z.tanh().pow(2)
-    return (dA - dA.matmul(tanh_squared))
+    return input.sigmoid()
+
+# def tanh_backward(dA: Tensor, Z: Tensor) -> Tensor:
+#     '''Backward activation function for tanh'''
+
+#     tanh_squared = Z.tanh().pow(2)
+#     return (dA - dA.matmul(tanh_squared))
 
 
 def relu(input: Tensor) -> Tensor:
@@ -58,3 +63,12 @@ def MSE_prime(y_hat: Tensor, y: Tensor) -> Tensor:
     '''Derivative of the mean squared error'''
 
     return -2 * (y_hat - y)
+
+############################ Utils ############################# noqa: E266
+
+
+def one_hot(y, dims=2):
+    y_hot = y.long().view(-1, 1).clone()
+    y_one_hot = torch.empty(y_hot.size()[0], dims).\
+        fill_(0.).scatter_(1, y_hot, 1)
+    return y_one_hot
