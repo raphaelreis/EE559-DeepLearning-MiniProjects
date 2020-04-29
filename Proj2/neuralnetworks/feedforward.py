@@ -22,17 +22,14 @@ class Feedforward(Module):
         self.activation = self.parse_activation(activation)
 
     def init_parameters(self):
-        self.W.normal_()
+        self.W.normal_(0.6)  # help ReLU
         if self.b is not None:
-            self.b.normal_()
+            self.b.normal_(0.6)  # help ReLU
 
     def parse_activation(self, activation):
         if activation == 'relu':
             F = relu
             dF = relu_backward
-        # elif activation == 'tanh':
-        #     F = tanh
-        #     dF = tanh_backward
         else:
             raise Exception("Not implemented activation function")
 
