@@ -8,7 +8,6 @@ def accuracy(y_pred, target):
 
 def compute_nb_errors(y_pred, target):
     
-    
     """ return the number of errors of a prediction given the target"""
     
     assert y_pred.shape[0] == len(target), "y_pred and target should be the same shape"
