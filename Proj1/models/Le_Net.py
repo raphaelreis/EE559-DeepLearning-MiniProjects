@@ -1,0 +1,158 @@
+import torch 
+from torch import nn 
+from torch.nn import functional as F
+from torch import optim
+
+##################################################
+Le_Net inspired network 
+Use weight sharing over the two channels
+Use auxiliary loss that classify the digit number
+##################################################
+
+
+class LeNet_sharing_aux(nn.Module):
+    """
+    Weight sharing + Auxiliary loss
+    
+    """
+    def __init__(self,drop_prob = 0):
+        super(LeNet_aux_sequential, self).__init__()
+        # convolutional weights for digit reocgnition shared for each image
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
+        self.bn1 = nn.BatchNorm2d(32)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
+        self.bn2 = nn.BatchNorm2d(64)
+        self.fc1 = nn.Linear(256, 200)
+        self.fc2 = nn.Linear(200, 10)
+        self.dropout = nn.Dropout(drop_prob)
+        
+        # weights for binary classification 
+        self.fc3 = nn.Linear(20, 60)
+        self.fc4 = nn.Linear(60, 90)
+        self.fc5 = nn.Linear(90, 2)
+        
+    def forward(self, input_):    
+        
+        # split the 2-channel input into two 14*14 images
+        x = input_[:, 0, :, :].view(-1, 1, 14, 14)
+        y = input_[:, 1, :, :].view(-1, 1, 14, 14)
+        
+        # forward pass for the first image 
+        x = F.relu(F.max_pool2d(self.bn1(self.conv1(x)), kernel_size=2, stride=2))
+        x = F.relu(F.max_pool2d(self.bn2(self.conv2(x)), kernel_size=2, stride=2))
+        x = F.relu(self.dropout(self.fc1(x.view(-1, 256))))
+        x = self.dropout(self.fc2(x))
+        
+        # forward pass for the second image 
+        y = F.relu(F.max_pool2d(self.bn1(self.conv1(y)), kernel_size=2, stride=2))
+        y = F.relu(F.max_pool2d(self.bn2(self.conv2(y)), kernel_size=2, stride=2))
+        y = F.relu(self.dropout(self.fc1(y.view(-1, 256))))
+        y = self.dropout(self.fc2(y))
+        
+        # concatenate layers  
+        z = torch.cat([x, y], 1)
+        
+        # Binary classification
+        z = F.relu(self.dropout(self.fc3(z)))
+        z = F.relu(self.dropout(self.fc4(z)))
+        z = self.dropout(self.fc5(z))
+        
+        return x, y, z
+    
+##################################################
+Le_Net inspired network 
+Use weight sharing over the two channels
+##################################################
+
+class LeNet_sharing(nn.Module):
+    """
+    Weight sharing 
+    
+    """
+    def __init__(self, nb_hidden):
+        super(LeNet_WS_sequential, self).__init__()
+        
+        # convolutional weights for digit reocgnition shared for each image
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
+        self.fc1 = nn.Linear(256, nb_hidden)
+        self.fc2 = nn.Linear(nb_hidden, 10)
+        # fully connected layers 
+        self.fc3 = nn.Linear(20, 60)
+        self.fc4 = nn.Linear(60, 90)
+        self.fc5 = nn.Linear(90, 2)
+        
+    def forward(self, input_):        
+        
+        # split the 2-channel input into two 14*14 images
+        x = input_[:, 0, :, :].view(-1, 1, 14, 14)
+        y = input_[:, 1, :, :].view(-1, 1, 14, 14)
+        
+        # forward pass for the first image 
+        x = F.relu(F.max_pool2d(self.conv1(x), kernel_size=2, stride=2))
+        x = F.relu(F.max_pool2d(self.conv2(x), kernel_size=2, stride=2))
+        x = F.relu(self.fc1(x.view(-1, 256)))
+        x = self.fc2(x)
+        # forward pass for the second image
+        y = F.relu(F.max_pool2d(self.conv1(y), kernel_size=2, stride=2))
+        y = F.relu(F.max_pool2d(self.conv2(y), kernel_size=2, stride=2))
+        y = F.relu(self.fc1(y.view(-1, 256)))
+        y = self.fc2(y)
+        
+        # concatenate layers 
+        z = torch.cat([x, y], 1)
+        
+        z = F.relu(self.fc3(z))
+        z = F.relu(self.fc4(z))
+        z = self.fc5(z)
+        
+        return  z
+
+##################################################
+Le_Net inspired network 
+##################################################
+
+class LeNet(nn.Module):
+    """ 
+    
+    """
+    def __init__(self, nb_hidden):
+        super(LeNet_WS_sequential, self).__init__()
+        
+        # convolutional weights for digit reocgnition shared for each image
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
+        self.conv3 = nn.Conv2d(1, 32, kernel_size=3)
+        self.conv4 = nn.Conv2d(32, 64, kernel_size=3)
+        self.fc1 = nn.Linear(256, nb_hidden)
+        self.fc2 = nn.Linear(nb_hidden, 10)
+        # fully connected layers 
+        self.fc3 = nn.Linear(20, 60)
+        self.fc4 = nn.Linear(60, 90)
+        self.fc5 = nn.Linear(90, 2)
+        
+    def forward(self, input_):        
+        
+        # split the 2-channel input into two 14*14 images
+        x = input_[:, 0, :, :].view(-1, 1, 14, 14)
+        y = input_[:, 1, :, :].view(-1, 1, 14, 14)
+        
+        # forward pass for the first image 
+        x = F.relu(F.max_pool2d(self.conv1(x), kernel_size=2, stride=2))
+        x = F.relu(F.max_pool2d(self.conv2(x), kernel_size=2, stride=2))
+        x = F.relu(self.fc1(x.view(-1, 256)))
+        x = self.fc2(x)
+        # forward pass for the second image
+        y = F.relu(F.max_pool2d(self.conv3(y), kernel_size=2, stride=2))
+        y = F.relu(F.max_pool2d(self.conv4(y), kernel_size=2, stride=2))
+        y = F.relu(self.fc1(y.view(-1, 256)))
+        y = self.fc2(y)
+        
+        # concatenate layers 
+        z = torch.cat([x, y], 1)
+        
+        z = F.relu(self.fc3(z))
+        z = F.relu(self.fc4(z))
+        z = self.fc5(z)
+        
+        return  z
