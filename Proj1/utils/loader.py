@@ -26,7 +26,7 @@ class PairSetMNIST(Dataset):
     
     """
     
-    def __init__(self, train=False, test=False, valid=False):
+    def __init__(self, train=False, test=False, valid=False): # add swap_channels
         
         train_input, train_target, train_classes, test_input,test_target,test_classes=load()
         
