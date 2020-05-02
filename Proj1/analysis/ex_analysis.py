@@ -1,5 +1,3 @@
-%reload_ext autoreload
-%autoreload 1
 import torch 
 from matplotlib import pyplot
 import sys

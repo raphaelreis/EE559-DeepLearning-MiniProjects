@@ -19,9 +19,9 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
     ax2.set_ylabel('Accuracy')
     b1, = ax2.plot(tr_accuracies, 'g--', linewidth=2, label = 'Train acc')
     b2, = ax2.plot(valid_accuracies, 'r--', linewidth=2, label = 'Validation acc')
-    
+
     t = [a1, a2, b1, b2]
-    ax1.legend(t, [t_.get_label() for t_ in t], loc = 'best', fontsize='small')
+    ax1.legend(t, [t_.get_label() for t_ in t], loc = 'center right', fontsize='small')
 
     pt.show()
     
