@@ -12,7 +12,7 @@ from utils.evaluate import compute_metrics
 #        Google_Net inspired network              #
 #    Use weight sharing over the two channels     #
 #Use auxiliary loss that classify the digit number#
-##################################################
+##################################################3
 
 class conv_block(nn.Module) :
     """
@@ -28,6 +28,8 @@ class conv_block(nn.Module) :
     def forward(self,x) :
         x = self.bn(self.conv(x))
         return x
+
+############################################################################################################################
     
 
 class Inception_block(nn.Module):
@@ -68,6 +70,8 @@ class Inception_block(nn.Module):
         
         return filter_cat
 
+############################################################################################################################
+
 class Auxiliary_loss (nn.Module) :
     """
     auxiliary loss classification of the digit number 0-9
@@ -100,6 +104,8 @@ class Auxiliary_loss (nn.Module) :
 
         return x
     
+##########################################################################################################################
+    
 class Google_Net (nn.Module) :
     """
     Google net implementing two inception layer in parralel for each channel
@@ -115,7 +121,7 @@ class Google_Net (nn.Module) :
         #self.conv1 = conv_block(1, 32, kernel_size = 3, padding = (3 - 1)//2)
         
         #inception block
-        self.inception1 = Inception_block(1,channels_1x1,channels_3x3,channels_5x5,pool_channels)
+        self.inception = Inception_block(1,channels_1x1,channels_3x3,channels_5x5,pool_channels)
         
         #auxiliary
         self.auxiliary = Auxiliary_loss(256,drop_prob_aux)
@@ -137,8 +143,8 @@ class Google_Net (nn.Module) :
         #y = self.conv1(y)
         
         # inception blocks
-        x = self.inception1(x)
-        y = self.inception1(y)
+        x = self.inception(x)
+        y = self.inception(y)
         
         
         # auxiliary loss 
@@ -155,6 +161,8 @@ class Google_Net (nn.Module) :
         
         
         return x,y,z
+    
+#################################################################################################################################
     
 def train_inception (model, train_data, validation_data, mini_batch_size=100, optimizer = optim.SGD,
                 criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, alpha=0.5, beta=0.5):
