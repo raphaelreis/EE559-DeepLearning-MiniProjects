@@ -46,7 +46,7 @@ def compute_metrics(model, Data, mini_batch_size=100, criterion = nn.CrossEntrop
 # simple validation 
 
 
-def validate_model(model,training_function, mini_batch_size=100, optimizer = optim.SGD,
+def validate_model(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, lambda_l2 = 0, 
                  alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False ): 
 
@@ -57,6 +57,8 @@ def validate_model(model,training_function, mini_batch_size=100, optimizer = opt
     test_data = Test_set(data)
     train_data_split =Training_set_split(train_data)
     validation_data= Validation_set(train_data)
+    
+    model = net_type()
     
     train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
     

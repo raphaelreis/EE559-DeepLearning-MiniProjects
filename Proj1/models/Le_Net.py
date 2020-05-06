@@ -17,7 +17,7 @@ class LeNet_sharing_aux(nn.Module):
     Weight sharing + Auxiliary loss
     
     """
-    def __init__(self,nbhidden_aux = 200,nbhidden_comp=60,drop_prob_aux = 0,drop_prob_comp = 0):
+    def __init__(self,nbhidden_aux = 200,nbhidden_comp=60,drop_prob_aux = 0.2,drop_prob_comp = 0):
         super(LeNet_sharing_aux, self).__init__()
         # convolutional weights for digit reocgnition shared for each image
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
@@ -44,14 +44,18 @@ class LeNet_sharing_aux(nn.Module):
         # forward pass for the first image 
         x = F.relu(F.max_pool2d(self.bn1(self.conv1(x)), kernel_size=2, stride=2))
         x = F.relu(F.max_pool2d(self.bn2(self.conv2(x)), kernel_size=2, stride=2))
-        x = F.relu(self.dropout_aux(self.fc1(x.view(-1, 256))))
-        x = self.dropout_aux(self.fc2(x))
+        x = self.dropout_aux(x)
+        x = F.relu(self.fc1(x.view(-1, 256)))
+        x = self.dropout_aux(x)
+        x = self.fc2(x)
         
         # forward pass for the second image 
         y = F.relu(F.max_pool2d(self.bn1(self.conv1(y)), kernel_size=2, stride=2))
         y = F.relu(F.max_pool2d(self.bn2(self.conv2(y)), kernel_size=2, stride=2))
-        y = F.relu(self.dropout_aux(self.fc1(y.view(-1, 256))))
-        y = self.dropout_aux(self.fc2(y))
+        y = self.dropout_aux(y)
+        y = F.relu(self.fc1(y.view(-1, 256)))
+        y = self.dropout_aux(y)
+        y = self.fc2(y)
         
         # concatenate layers  
         z = torch.cat([x, y], 1)

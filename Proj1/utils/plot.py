@@ -9,7 +9,7 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
 
     """ Plots learning curve over training epochs for single model """
     
-    fig, ax1 = pt.subplots()
+    fig, ax1 = plt.subplots()
     ax1.set_xlabel('Epochs')
     ax1.set_ylabel('Normalized loss [loss/data size]')
     a1, = ax1.plot(tr_losses, 'g', linewidth=2, label = 'Train loss')
