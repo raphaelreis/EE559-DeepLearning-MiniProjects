@@ -6,13 +6,13 @@ from torch.nn import functional as F
 from torch import optim
 import torch.utils.data as dt
 from torch.utils.data import Dataset, DataLoader
-from utils.evaluate import compute_metrics
+from utils.evaluate_aux import compute_metrics
 
 ###################################################
 #        Google_Net inspired network              #
 #    Use weight sharing over the two channels     #
 #Use auxiliary loss that classify the digit number#
-##################################################3
+###################################################
 
 class conv_block(nn.Module) :
     """

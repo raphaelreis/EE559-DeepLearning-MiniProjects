@@ -64,6 +64,7 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     train_data_split =Training_set_split(train_data)
     validation_data= Validation_set(train_data)
 
+
     model = net_type()
 
     if GPU and cuda.is_available():
@@ -89,9 +90,9 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
 
 # evaluation and final prediction statistics on large test set
 
-def evaluate_model(net_type,training_function, n_trials=10, mini_batch_size=100, optimizer = optim.SGD,
+def evaluate_model(net,training_function, n_trials=10, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
-                 lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False): 
+                 lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
     
     """ 10 rounds of training / validation + testing metrics statistics  """
     
@@ -106,8 +107,8 @@ def evaluate_model(net_type,training_function, n_trials=10, mini_batch_size=100,
         test_data = Test_set(data)
         train_data_split =Training_set_split(train_data)
         validation_data= Validation_set(train_data)
-        
-        model = net_type()
+
+        model = net()
 
         if GPU and cuda.is_available():
             device = torch.device('cuda')
@@ -115,7 +116,7 @@ def evaluate_model(net_type,training_function, n_trials=10, mini_batch_size=100,
             device = torch.device('cpu')
 
 
-        model =model.to(device)
+        model = model.to(device)
 
         train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
         train_results[n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
@@ -137,7 +138,7 @@ def evaluate_model(net_type,training_function, n_trials=10, mini_batch_size=100,
 
 def grid_search(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
-                 lambda_l2 = 0, alpha=0.5, beta=0.5,rotate = False,translate=False,swap_channel = False):
+                 lambda_l2 = 0, alpha=0.5, beta=0.5,rotate = False,translate=False,swap_channel = False, GPU=False):
     # parameters to optimize
     drop_prob_aux = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
     drop_prob_comp = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
@@ -158,12 +159,19 @@ def grid_search(net_type,training_function, mini_batch_size=100, optimizer = opt
                 
                 # create the network
                 model = net_type(drop_prob_aux = prob_aux,drop_prob_comp = prob_comp)
+
+                if GPU and cuda.is_available():
+                    device = torch.device('cuda')
+                else:
+                    device = torch.device('cpu')
+
+                model =model.to(device)
                 
                 # train the network
-                train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2 ,alpha, beta)
+                train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2 ,alpha, beta)
                 
                 train_results[idx,idy,n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
-                test_loss, test_acc = compute_metrics(model, test_data)
+                test_loss, test_acc = compute_metrics(model, test_data, device)
                 test_losses[idx,idy,n] = test_loss
                 test_accuracies[idx,idy,n] = test_acc
         

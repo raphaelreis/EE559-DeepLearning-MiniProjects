@@ -2,7 +2,8 @@ import torch
 from torch import nn 
 from torch.nn import functional as F
 from torch import optim
-from utils.evaluate import compute_metrics
+from utils.evaluate_aux import compute_metrics as metrics_aux
+from utils.evaluate_ws import compute_metrics as metrics_ws
 from torch.utils.data import Dataset, DataLoader
 
 ###################################################
@@ -77,8 +78,8 @@ class LeNet_sharing(nn.Module):
     Weight sharing 
     
     """
-    def __init__(self, nb_hidden):
-        super(LeNet_WS_sequential, self).__init__()
+    def __init__(self, nb_hidden, dropout_prob):
+        super(LeNet_sharing, self).__init__()
         
         # convolutional weights for digit reocgnition shared for each image
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
@@ -89,6 +90,8 @@ class LeNet_sharing(nn.Module):
         self.fc3 = nn.Linear(20, 60)
         self.fc4 = nn.Linear(60, 90)
         self.fc5 = nn.Linear(90, 2)
+        # dropout proba
+        self.dropout = nn.Dropout(dropout_prob)
         
     def forward(self, input_):        
         
@@ -100,60 +103,13 @@ class LeNet_sharing(nn.Module):
         x = F.relu(F.max_pool2d(self.conv1(x), kernel_size=2, stride=2))
         x = F.relu(F.max_pool2d(self.conv2(x), kernel_size=2, stride=2))
         x = F.relu(self.fc1(x.view(-1, 256)))
+        x = self.dropout(x)
         x = self.fc2(x)
         # forward pass for the second image
         y = F.relu(F.max_pool2d(self.conv1(y), kernel_size=2, stride=2))
         y = F.relu(F.max_pool2d(self.conv2(y), kernel_size=2, stride=2))
         y = F.relu(self.fc1(y.view(-1, 256)))
-        y = self.fc2(y)
-        
-        # concatenate layers 
-        z = torch.cat([x, y], 1)
-        
-        z = F.relu(self.fc3(z))
-        z = F.relu(self.fc4(z))
-        z = self.fc5(z)
-        
-        return  z
-
-##################################################
-#         Le_Net inspired network                #
-##################################################
-
-class LeNet(nn.Module):
-    """ 
-    
-    """
-    def __init__(self, nb_hidden):
-        super(LeNet_WS_sequential, self).__init__()
-        
-        # convolutional weights for digit reocgnition shared for each image
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
-        self.conv3 = nn.Conv2d(1, 32, kernel_size=3)
-        self.conv4 = nn.Conv2d(32, 64, kernel_size=3)
-        self.fc1 = nn.Linear(256, nb_hidden)
-        self.fc2 = nn.Linear(nb_hidden, 10)
-        # fully connected layers 
-        self.fc3 = nn.Linear(20, 60)
-        self.fc4 = nn.Linear(60, 90)
-        self.fc5 = nn.Linear(90, 2)
-        
-    def forward(self, input_):        
-        
-        # split the 2-channel input into two 14*14 images
-        x = input_[:, 0, :, :].view(-1, 1, 14, 14)
-        y = input_[:, 1, :, :].view(-1, 1, 14, 14)
-        
-        # forward pass for the first image 
-        x = F.relu(F.max_pool2d(self.conv1(x), kernel_size=2, stride=2))
-        x = F.relu(F.max_pool2d(self.conv2(x), kernel_size=2, stride=2))
-        x = F.relu(self.fc1(x.view(-1, 256)))
-        x = self.fc2(x)
-        # forward pass for the second image
-        y = F.relu(F.max_pool2d(self.conv3(y), kernel_size=2, stride=2))
-        y = F.relu(F.max_pool2d(self.conv4(y), kernel_size=2, stride=2))
-        y = F.relu(self.fc1(y.view(-1, 256)))
+        y = self.dropout(y)
         y = self.fc2(y)
         
         # concatenate layers 
@@ -167,9 +123,9 @@ class LeNet(nn.Module):
 
 ###################################################################################################################
 
-##### train function ######
+##### train functions ######
 
-def train_Le_Net (model, train_data, validation_data, device, mini_batch_size=100, optimizer = optim.SGD,
+def train_Le_Net_Aux (model, train_data, validation_data, device, mini_batch_size=100, optimizer = optim.SGD,
                 criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1,lambda_l2=0, alpha=0.5, beta=0.5):
     
     """
@@ -207,8 +163,57 @@ def train_Le_Net (model, train_data, validation_data, device, mini_batch_size=10
             net_loss.backward()
             optimizer.step()
             
-        tr_loss, tr_acc = compute_metrics(model, train_data, device)
-        val_loss, val_acc = compute_metrics(model, validation_data, device)
+        tr_loss, tr_acc = metrics_aux(model, train_data, device)
+        val_loss, val_acc = metrics_aux(model, validation_data, device)
+        
+        train_losses.append(tr_loss)
+        train_acc.append(tr_acc)
+        valid_acc.append(val_acc)
+        valid_losses.append(val_loss)
+            
+        print('Train Epoch: {}  | Loss {:.6f}'.format(
+                e, epoch_loss.item()))
+        
+    return train_losses, train_acc, valid_losses, valid_acc
+
+    ########################################################################################################################
+
+def train_Le_Net_Weight_Sharing (model, train_data, validation_data, device, mini_batch_size=100, optimizer = optim.SGD,
+                criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1,lambda_l2=0, alpha=0.5, beta=0.5):
+    
+    """ Train network with weight sharing and record train/validation history """
+
+    train_acc = []
+    train_losses = []
+    valid_acc = []
+    valid_losses = []
+    
+    optimizer = optimizer(model.parameters(), lr = eta, weight_decay = lambda_l2)
+    
+    train_loader = DataLoader(train_data, batch_size=mini_batch_size, shuffle=True)
+    
+    for e in range(n_epochs):
+        epoch_loss = 0
+        model.train(True)
+        for i, data in enumerate(train_loader, 0):
+            
+            input_, target_, classes_ = data
+
+            input_ = input_.to(device)
+            target_ = target_.to(device)
+            classes_ = classes_.to(device)
+
+            out = model(input_)
+            out_loss  = criterion(out, target_)
+           
+            epoch_loss += out_loss
+            
+            optimizer.zero_grad()
+            out_loss.backward()
+            optimizer.step()
+            
+        tr_loss, tr_acc = metrics_ws(model, train_data, device)
+        val_loss, val_acc = metrics_ws(model, validation_data, device)
         
         train_losses.append(tr_loss)
         train_acc.append(tr_acc)
