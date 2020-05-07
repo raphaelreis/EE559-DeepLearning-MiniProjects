@@ -1,4 +1,4 @@
-from matplotlib import pyplot as pt
+from matplotlib import pyplot as plt
 import sys
 import numpy as np
 sys.path.append('..')

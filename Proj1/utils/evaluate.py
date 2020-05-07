@@ -11,12 +11,13 @@ from torch.utils.data import Dataset, DataLoader
 from utils.loader import load,PairSetMNIST,Training_set,Test_set, Training_set_split,Validation_set
 from utils.plot import learning_curve
 from utils.metrics import accuracy, compute_nb_errors
+import torch.cuda as cuda
 
 
 
 # compute loss and accuracy given a model and test (or validation) data
 
-def compute_metrics(model, Data, mini_batch_size=100, criterion = nn.CrossEntropyLoss()):
+def compute_metrics(model, Data, device, mini_batch_size=100, criterion = nn.CrossEntropyLoss()):
     
     """
     function to calculate prediction accuracy + loss of a cnn with auxiliary loss
@@ -31,6 +32,11 @@ def compute_metrics(model, Data, mini_batch_size=100, criterion = nn.CrossEntrop
         
         for i, data in enumerate(data_loader, 0):
             input_, target_, classes_ = data
+
+            input_ = input_.to(device)
+            target_ = target_.to(device)
+            classes_ = classes_.to(device)
+
             _, _, output = model(input_) 
             batch_loss = criterion(output, target_)
             test_loss += batch_loss     
@@ -48,7 +54,7 @@ def compute_metrics(model, Data, mini_batch_size=100, criterion = nn.CrossEntrop
 
 def validate_model(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, lambda_l2 = 0, 
-                 alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False ): 
+                 alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
 
     """ Training / validation over n_epochs + testing a full test set"""
     
@@ -57,21 +63,27 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     test_data = Test_set(data)
     train_data_split =Training_set_split(train_data)
     validation_data= Validation_set(train_data)
-    
+
     model = net_type()
-    
-    train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
+
+    if GPU and cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
+
+
+    model =model.to(device)
+        
+    train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
     
     if plot:
         
         learning_curve(train_losses, train_acc, valid_losses, valid_acc)
 
-    test_loss, test_accuracy = compute_metrics(model, test_data)
+    test_loss, test_accuracy = compute_metrics(model, test_data, device)
     
     print('\nTest Set | Loss: {:.4f} | Accuracy: {:.2f}%\n'.format(test_loss, test_accuracy))
     
-# to do : cross validation
-
 
 ########################################################################################################################################
 
@@ -97,9 +109,17 @@ def evaluate_model(net_type,training_function, n_trials=10, mini_batch_size=100,
         
         model = net_type()
 
-        train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
+        if GPU and cuda.is_available():
+            device = torch.device('cuda')
+        else:
+            device = torch.device('cpu')
+
+
+        model =model.to(device)
+
+        train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2, alpha, beta)
         train_results[n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
-        test_loss, test_acc = compute_metrics(model, test_data)
+        test_loss, test_acc = compute_metrics(model, test_data, device)
         test_losses.append(test_loss)
         test_accuracies.append(test_acc)
         

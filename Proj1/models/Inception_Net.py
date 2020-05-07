@@ -164,7 +164,7 @@ class Google_Net (nn.Module) :
     
 #################################################################################################################################
     
-def train_inception (model, train_data, validation_data, mini_batch_size=100, optimizer = optim.SGD,
+def train_inception (model, train_data, validation_data, device, mini_batch_size=100, optimizer = optim.SGD,
                 criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, alpha=0.5, beta=0.5):
     
     """
@@ -187,6 +187,11 @@ def train_inception (model, train_data, validation_data, mini_batch_size=100, op
         for i, data in enumerate(train_loader, 0):
             
             input_, target_, classes_ = data
+
+            input_ = input_.to(device)
+            target_ = target_.to(device)
+            classes_ = classes_.to(device)
+
             class_1, class_2, out = model(input_)
             aux_loss1 = criterion(class_1, classes_[:,0])
             aux_loss2 = criterion(class_2, classes_[:,1])
@@ -198,8 +203,8 @@ def train_inception (model, train_data, validation_data, mini_batch_size=100, op
             net_loss.backward()
             optimizer.step()
             
-        tr_loss, tr_acc = compute_metrics(model, train_data)
-        val_loss, val_acc = compute_metrics(model, validation_data)
+        tr_loss, tr_acc = compute_metrics(model, train_data, device)
+        val_loss, val_acc = compute_metrics(model, validation_data, device)
         
         train_losses.append(tr_loss)
         train_acc.append(tr_acc)
