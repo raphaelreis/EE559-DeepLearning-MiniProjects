@@ -9,7 +9,7 @@ from torch import optim
 import torch.utils.data as dt
 from torch.utils.data import Dataset, DataLoader
 from utils.loader import load,PairSetMNIST,Training_set,Test_set, Training_set_split,Validation_set
-from utils.plot import learning_curve
+from utils.plot import learning_curve, boxplot
 from utils.metrics import accuracy, compute_nb_errors
 import torch.cuda as cuda
 
@@ -49,7 +49,7 @@ def compute_metrics(model, Data, device, mini_batch_size=100, criterion = nn.Cro
     
 ##################################################################################################################################    
     
-# simple validation 
+# simple validation and learning curve visualization for one training /tetsing run 
 
 
 def validate_model(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
@@ -90,25 +90,28 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
 
 # evaluation and final prediction statistics on large test set
 
-def evaluate_model(net,training_function, n_trials=10, mini_batch_size=100, optimizer = optim.SGD,
+def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
     
     """ 10 rounds of training / validation + testing metrics statistics  """
     
-    train_results = torch.empty(n_trials, 4, n_epochs)
+    train_results = torch.empty(len(seeds), 4, n_epochs)
     test_losses = []
     test_accuracies = []
     
-    for n in range(n_trials):
-    
+    for n, seed in enumerate(seeds):
+
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed) 
+        
         data = PairSetMNIST( rotate,translate,swap_channel)
         train_data = Training_set(data)
         test_data = Test_set(data)
         train_data_split =Training_set_split(train_data)
         validation_data= Validation_set(train_data)
 
-        model = net(200, 0.5)
+        model = net(200, 0.5)  # model with the best hyperparameters to evaluate 
 
         if GPU and cuda.is_available():
             device = torch.device('cuda')
@@ -130,18 +133,16 @@ def evaluate_model(net,training_function, n_trials=10, mini_batch_size=100, opti
             
             
         
-        print('\nTrial {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
-        
-    return train_results, test_losses, test_accuracies
+        print('Seed {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
+
+    return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 
     #######################################################################################################################
 
-def grid_search(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
+def grid_search(net_type,training_function, drop_prob, hidden_layers, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, rotate = False,translate=False,swap_channel = False, GPU=False):
-    # parameters to optimize
-    drop_prob = [0.1,0.2]
-    hidden_layers = [50, 100]
+    
     
     train_results = torch.empty(len(drop_prob),len(hidden_layers),3, 4, n_epochs)
     test_losses = torch.empty(len(drop_prob), len(hidden_layers), 3)

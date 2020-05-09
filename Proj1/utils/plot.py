@@ -27,3 +27,33 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
     plt.show()
     
 # to do boxplot
+
+def boxplot(data):
+
+    """ 
+    plots a single boxplot for a single model type
+    
+    INPUT : a 2 by (number of seeds tensor) with in each line the model accuracies
+
+    """
+
+    labels = ['Train', 'Test']
+
+    boxdict1, boxdict2 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black')
+    whiskerdict1, whiskerdict2 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black')
+    mediandict = dict(linestyle='--', linewidth=1.5, color='red')
+
+    fig1, ax1 = plt.subplots(1,1,figsize=(10,7))
+
+    ax1.set_title('Weight Sharing')
+
+    bplot = ax1.boxplot(data, patch_artist=False, widths = 0.2, showfliers=True, showcaps=False, boxprops=boxdict1, whiskerprops=whiskerdict1, medianprops=mediandict, labels=labels)
+
+    for i in range(2):
+        y = data[i]
+        x = np.random.normal(i+1, 0.04, size=len(y))
+        ax1.plot(x, y, 'r.', alpha=1)
+
+    ax1.yaxis.grid(True)
+    ax1.set_xlabel('')
+    ax1.set_ylabel('Accuracy (%)')
