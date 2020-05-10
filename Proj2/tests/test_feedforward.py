@@ -4,10 +4,21 @@ import logging
 
 from torch import empty
 
-from neuralnetworks.feedforward import Feedforward
+from neuralnetworks.feedforward import Feedforward, kaiming
+from neuralnetworks.functions import relu
 
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 log = logging.getLogger("TestFeedforward")
+
+
+class TestFunctions(unittest.TestCase):
+    def testKaiming(self):
+        input = 25
+        output = 25
+        x = empty(input).normal_()
+        for i in range(100):
+            a = kaiming(input, output)
+            x = relu(a @ x)
 
 
 class TestPasses(unittest.TestCase):
