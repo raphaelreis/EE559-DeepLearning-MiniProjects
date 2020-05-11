@@ -14,7 +14,6 @@ from utils.metrics import accuracy, compute_nb_errors
 import torch.cuda as cuda
 
 
-
 # compute loss and accuracy given a model and test (or validation) data
 
 def compute_metrics(model, Data, device, mini_batch_size=100, criterion = nn.CrossEntropyLoss()):
@@ -46,7 +45,8 @@ def compute_metrics(model, Data, device, mini_batch_size=100, criterion = nn.Cro
         test_loss = test_loss/Data.len     # normalize loss
               
         return test_loss.item(), acc
-    
+
+
 ##################################################################################################################################    
     
 # simple validation and learning curve visualization for one training /tetsing run 
@@ -65,7 +65,7 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     validation_data= Validation_set(train_data)
 
 
-    model = net_type(100, 0.2)
+    model = net_type()
 
     if GPU and cuda.is_available():
         device = torch.device('cuda:1')
@@ -86,10 +86,6 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     print('\nTest Set | Loss: {:.4f} | Accuracy: {:.2f}%\n'.format(test_loss, test_accuracy))
     
 
-########################################################################################################################################
-
-# evaluation and final prediction statistics on large test set
-
 def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
@@ -105,16 +101,16 @@ def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer 
         torch.manual_seed(seed)
         torch.cuda.manual_seed(seed) 
         
-        data = PairSetMNIST( rotate,translate,swap_channel)
+        data = PairSetMNIST(rotate,translate,swap_channel)
         train_data = Training_set(data)
         test_data = Test_set(data)
         train_data_split =Training_set_split(train_data)
         validation_data= Validation_set(train_data)
 
-        model = net(200, 0.5)  # model with the best hyperparameters to evaluate 
+        model = net(300)  # model with the best hyperparameters to evaluate 
 
         if GPU and cuda.is_available():
-            device = torch.device('cuda:1')
+            device = torch.device('cuda')
         else:
             device = torch.device('cpu')
 
@@ -136,46 +132,3 @@ def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer 
         print('Seed {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
 
     return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
-
-    #######################################################################################################################
-
-def grid_search(net_type,training_function, drop_prob, hidden_layers, mini_batch_size=100, optimizer = optim.SGD,
-                 criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
-                 lambda_l2 = 0, rotate = False,translate=False,swap_channel = False, GPU=False):
-    
-    
-    train_results = torch.empty(len(drop_prob),len(hidden_layers),3, 4, n_epochs)
-    test_losses = torch.empty(len(drop_prob), len(hidden_layers), 3)
-    test_accuracies = torch.empty(len (drop_prob), len(hidden_layers), 3)
-    
-    for idx,prob in enumerate(drop_prob):
-        for idy,nb_hidden in enumerate(hidden_layers) :
-            for n in range(3) :
-                print('prob : {:.1f}, nb_hidden : {:d} (n= {:d})'.format(prob, nb_hidden, n))
-                # create the data
-                data = PairSetMNIST( rotate,translate,swap_channel)
-                train_data = Training_set(data)
-                test_data = Test_set(data)
-                train_data_split =Training_set_split(train_data)
-                validation_data= Validation_set(train_data)
-                
-                # create the network
-                model = net_type(nb_hidden, prob)
-
-                if GPU and cuda.is_available():
-                    device = torch.device('cuda')
-                else:
-                    device = torch.device('cpu')
-
-                model =model.to(device)
-                
-                # train the network
-                train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2)
-                
-                train_results[idx,idy,n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
-                test_loss, test_acc = compute_metrics(model, test_data, device)
-                test_losses[idx,idy,n] = test_loss
-                test_accuracies[idx,idy,n] = test_acc
-        
-    return train_results, test_losses, test_accuracies
-        

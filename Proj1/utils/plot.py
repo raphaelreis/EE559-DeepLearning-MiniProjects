@@ -28,7 +28,7 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
     
 # to do boxplot
 
-def boxplot(data):
+def boxplot(data, title='Boxplot'):
 
     """ 
     plots a single boxplot for a single model type
@@ -45,7 +45,7 @@ def boxplot(data):
 
     fig1, ax1 = plt.subplots(1,1,figsize=(10,7))
 
-    ax1.set_title('Weight Sharing')
+    ax1.set_title(title)
 
     bplot = ax1.boxplot(data, patch_artist=False, widths = 0.2, showfliers=True, showcaps=False, boxprops=boxdict1, whiskerprops=whiskerdict1, medianprops=mediandict, labels=labels)
 

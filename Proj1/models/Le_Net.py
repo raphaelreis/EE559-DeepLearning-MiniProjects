@@ -171,8 +171,8 @@ def train_Le_Net_Aux (model, train_data, validation_data, device, mini_batch_siz
         valid_acc.append(val_acc)
         valid_losses.append(val_loss)
             
-        print('Train Epoch: {}  | Loss {:.6f}'.format(
-                e, epoch_loss.item()))
+        #print('Train Epoch: {}  | Loss {:.6f}'.format(
+         #       e, epoch_loss.item()))
         
     return train_losses, train_acc, valid_losses, valid_acc
 

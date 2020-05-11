@@ -68,7 +68,7 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     model = net_type()
 
     if GPU and cuda.is_available():
-        device = torch.device('cuda')
+        device = torch.device('cuda:1')
     else:
         device = torch.device('cpu')
 
@@ -90,17 +90,17 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
 
 # evaluation and final prediction statistics on large test set
 
-def evaluate_model(net,training_function, n_trials=10, mini_batch_size=100, optimizer = optim.SGD,
+def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
     
     """ 10 rounds of training / validation + testing metrics statistics  """
     
-    train_results = torch.empty(n_trials, 4, n_epochs)
+    train_results = torch.empty(len(seeds), 4, n_epochs)
     test_losses = []
     test_accuracies = []
     
-    for n in range(n_trials):
+    for n, seed in enumerate(seeds):
     
         data = PairSetMNIST( rotate,translate,swap_channel)
         train_data = Training_set(data)
@@ -132,7 +132,7 @@ def evaluate_model(net,training_function, n_trials=10, mini_batch_size=100, opti
         
         print('\nTrial {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
         
-    return train_results, test_losses, test_accuracies
+    return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 
 ##########################################################################################################################################
 
