@@ -68,7 +68,7 @@ def validate_model(net_type,training_function, mini_batch_size=100, optimizer = 
     model = net_type(100, 0.2)
 
     if GPU and cuda.is_available():
-        device = torch.device('cuda:1')
+        device = torch.device('cuda')
     else:
         device = torch.device('cpu')
 
@@ -114,7 +114,7 @@ def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer 
         model = net(200, 0.5)  # model with the best hyperparameters to evaluate 
 
         if GPU and cuda.is_available():
-            device = torch.device('cuda:1')
+            device = torch.device('cuda')
         else:
             device = torch.device('cpu')
 
