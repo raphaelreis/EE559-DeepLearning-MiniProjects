@@ -136,20 +136,25 @@ def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer 
 
 ##########################################################################################################################################
 
-def grid_search(net_type,training_function, mini_batch_size=100, optimizer = optim.SGD,
+def grid_search(net_type,training_function, drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, alpha=0.5, beta=0.5,rotate = False,translate=False,swap_channel = False, GPU=False):
-    # parameters to optimize
-    drop_prob_aux = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
-    drop_prob_comp = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]
     
-    train_results = torch.empty(11,11,5, 4, n_epochs)
-    test_losses = torch.empty(11,11,5)
-    test_accuracies = torch.empty(11,11,5)
+    train_results = torch.empty(len(drop_prob_aux),len(drop_prob_comp),len(seeds), 4, n_epochs)
+    test_losses = torch.empty(len(drop_prob_aux),len(drop_prob_comp),len(seeds))
+    test_accuracies = torch.empty(len(drop_prob_aux),len(drop_prob_comp),len(seeds))
     
     for idx,prob_aux in enumerate(drop_prob_aux):
         for idy,prob_comp in enumerate(drop_prob_comp) :
-            for n in range(5) :
+            for n, seed in enumerate(seeds) :
+                print('prob aux : {:.1f}, prob comp : {:.1f} (n= {:d})'.format(prob_aux, prob_comp, n))
+
+
+                # set seed
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed(seed)
+
+
                 # create the data
                 data = PairSetMNIST( rotate,translate,swap_channel)
                 train_data = Training_set(data)
@@ -175,5 +180,22 @@ def grid_search(net_type,training_function, mini_batch_size=100, optimizer = opt
                 test_losses[idx,idy,n] = test_loss
                 test_accuracies[idx,idy,n] = test_acc
         
+    validation_grid_mean_acc = torch.mean(train_results[:,:,:,3,39], dim= 2)
+    validation_grid_std_acc = torch.std(train_results[:,:,:,3,39], dim= 2)
+
+    train_grid_mean_acc = torch.mean(train_results[:,:,:,1,39], dim= 2)
+    train_grid_std_acc = torch.std(train_results[:,:,:,1,39], dim= 2)
+
+    idx = torch.where(validation_grid_mean_acc == validation_grid_mean_acc.max())
+
+    if len(idx[0]) >=2:
+                idx=idx[0]
+
+    drop_prob_aux = drop_prob_aux[idx[0].item()]
+    drop_prob_comp = drop_prob_comp[idx[1].item()]
+
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
+                        validation_grid_mean_acc[idx[0].item(), idx[1].item()], validation_grid_std_acc[idx[0].item(), idx[1].item()], drop_prob_aux, drop_prob_comp))
+                    
     return train_results, test_losses, test_accuracies
         

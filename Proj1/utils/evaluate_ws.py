@@ -139,19 +139,24 @@ def evaluate_model(net,training_function, seeds, mini_batch_size=100, optimizer 
 
     #######################################################################################################################
 
-def grid_search(net_type,training_function, drop_prob, hidden_layers, mini_batch_size=100, optimizer = optim.SGD,
+def grid_search(net_type,training_function, drop_prob, hidden_layers, seeds,  mini_batch_size=100, optimizer = optim.SGD,
                  criterion = nn.CrossEntropyLoss(), n_epochs=40, eta=1e-1, 
                  lambda_l2 = 0, rotate = False,translate=False,swap_channel = False, GPU=False):
     
     
-    train_results = torch.empty(len(drop_prob),len(hidden_layers),3, 4, n_epochs)
-    test_losses = torch.empty(len(drop_prob), len(hidden_layers), 3)
-    test_accuracies = torch.empty(len (drop_prob), len(hidden_layers), 3)
+    train_results = torch.empty(len(drop_prob),len(hidden_layers),len(seeds), 4, n_epochs)
+    test_losses = torch.empty(len(drop_prob), len(hidden_layers), len(seeds))
+    test_accuracies = torch.empty(len (drop_prob), len(hidden_layers), len(seeds))
     
     for idx,prob in enumerate(drop_prob):
         for idy,nb_hidden in enumerate(hidden_layers) :
-            for n in range(3) :
+            for n, seed in enumerate(seeds):
                 print('prob : {:.1f}, nb_hidden : {:d} (n= {:d})'.format(prob, nb_hidden, n))
+
+                # set seed
+                torch.manual_seed(seed)
+                torch.cuda.manual_seed(seed)
+
                 # create the data
                 data = PairSetMNIST( rotate,translate,swap_channel)
                 train_data = Training_set(data)
@@ -172,10 +177,28 @@ def grid_search(net_type,training_function, drop_prob, hidden_layers, mini_batch
                 # train the network
                 train_losses, train_acc, valid_losses, valid_acc = training_function(model, train_data_split, validation_data, device, mini_batch_size, optimizer,criterion,n_epochs, eta,lambda_l2)
                 
+                # store train and test results 
                 train_results[idx,idy,n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
                 test_loss, test_acc = compute_metrics(model, test_data, device)
                 test_losses[idx,idy,n] = test_loss
                 test_accuracies[idx,idy,n] = test_acc
-        
+
+    validation_grid_mean_acc = torch.mean(train_results[:,:,:,3,39], dim= 2)
+    validation_grid_std_acc = torch.std(train_results[:,:,:,3,39], dim= 2)
+
+    train_grid_mean_acc = torch.mean(train_results[:,:,:,1,39], dim= 2)
+    train_grid_std_acc = torch.std(train_results[:,:,:,1,39], dim= 2)
+
+    idx = torch.where(validation_grid_mean_acc == validation_grid_mean_acc.max())
+
+    if len(idx[0]) >=2:
+                idx=idx[0]
+
+    opt_prob = drop_prob[idx[0].item()]
+    opt_hidden_layer = hidden_layers[idx[1].item()]
+
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
+                        validation_grid_mean_acc[idx[0].item(), idx[1].item()], validation_grid_std_acc[idx[0].item(), idx[1].item()], opt_prob, opt_hidden_layer))
+                    
     return train_results, test_losses, test_accuracies
         
