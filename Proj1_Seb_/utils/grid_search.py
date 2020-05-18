@@ -31,7 +31,7 @@ def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100,
         for idx,prob in enumerate(drop_prob):
             for idy,nb_hidden in enumerate(hidden_layers) :
                 for n, seed in enumerate(seeds):
-                    print('lr : {:.2f} , prob : {:.2f}, nb_hidden : {:d} (n= {:d})'.format(eta,prob, nb_hidden, n))
+                    print('lr : {:.4f} , prob : {:.2f}, nb_hidden : {:d} (n= {:d})'.format(eta,prob, nb_hidden, n))
 
                     # set the pytorch seeds
                     torch.manual_seed(seed)
@@ -68,11 +68,11 @@ def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100,
                     test_losses[idz,idx,idy,n] = test_loss
                     test_accuracies[idz,idx,idy,n] = test_acc
 
-    validation_grid_mean_acc = torch.mean(train_results[:,:,:,:,3,39], dim= 2)
-    validation_grid_std_acc = torch.std(train_results[:,:,:,:,3,39], dim= 2)
+    validation_grid_mean_acc = torch.mean(train_results[:,:,:,:,3,39], dim= 3)
+    validation_grid_std_acc = torch.std(train_results[:,:,:,:,3,39], dim= 3)
 
-    train_grid_mean_acc = torch.mean(train_results[:,:,:,:,1,39], dim= 2)
-    train_grid_std_acc = torch.std(train_results[:,:,:,:,1,39], dim= 2)
+    train_grid_mean_acc = torch.mean(train_results[:,:,:,:,1,39], dim= 3)
+    train_grid_std_acc = torch.std(train_results[:,:,:,:,1,39], dim= 3)
 
     idx = torch.where(validation_grid_mean_acc == validation_grid_mean_acc.max())
 
@@ -102,7 +102,7 @@ def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100,
         for idx,prob_ws in enumerate(drop_prob_ws):
             for idy,prob_comp in enumerate(drop_prob_comp) :
                 for n, seed in enumerate(seeds):
-                    print('lr : {:.2f} , prob_ws : {:.2f}, prob_comp : {:d} (n= {:d})'.format(eta,prob_ws, prob_comp, n))
+                    print('lr : {:.4f} , prob_ws : {:.2f}, prob_comp : {:d} (n= {:d})'.format(eta,prob_ws, prob_comp, n))
 
                     # set seed
                     torch.manual_seed(seed)
@@ -151,8 +151,8 @@ def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100,
                 idx=idx[0]
 
     opt_lr = lrs[idx[0].item()]
-    opt_prob_ws = drop_prob[idx[1].item()]
-    opt_prob_comp = hidden_layers[idx[2].item()]
+    opt_prob_ws = drop_prob_ws[idx[1].item()]
+    opt_prob_comp = drop_prob_comb[idx[2].item()]
     
     print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.2f} ,dropout rate ws = {:.2f} and dropout rate comp = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[1].item()],opt_lr, opt_prob_ws, opt_prob_comp))
@@ -172,7 +172,7 @@ def grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=10
         for idx,prob_aux in enumerate(drop_prob_aux):
             for idy,prob_comp in enumerate(drop_prob_comp) :
                 for n, seed in enumerate(seeds) :
-                    print(' lr : {:.2f}, prob aux : {:.2f}, prob comp : {:.2f} (n= {:d})'.format(eta,prob_aux, prob_comp, n))
+                    print(' lr : {:.4f}, prob aux : {:.2f}, prob comp : {:.2f} (n= {:d})'.format(eta,prob_aux, prob_comp, n))
 
 
                     # set seed
