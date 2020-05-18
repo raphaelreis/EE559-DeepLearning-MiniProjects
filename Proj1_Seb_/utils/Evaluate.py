@@ -76,7 +76,8 @@ def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criter
 # evaluation and final prediction statistics on large test set
 
 def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, criterion = nn.CrossEntropyLoss(), n_epochs=40, eta = 1e-3,
-                   lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,swap_channel = False, GPU=False): 
+                   lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,statistics = True ,rotate = False,translate=False,swap_channel = False,
+                   GPU=False): 
     
     """ 10 rounds of training / validation + testing metrics statistics  """
     
@@ -129,12 +130,14 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
         test_accuracies.append(test_acc)
         
         if plot:
-            
             learning_curve(train_losses, train_acc, valid_losses, valid_acc)
-            
-            
         
         print('Seed {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
+    
+    data = torch.stack([train_results[:,1,39], train_results[:,3,39] , torch.tensor(test_accuracies)])
+    
+    if statistics :
+        boxplot(data)
 
     return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 

@@ -37,10 +37,10 @@ def boxplot(data, title='Boxplot'):
 
     """
 
-    labels = ['Train', 'Test']
+    labels = ['Train','Validation', 'Test']
 
-    boxdict1, boxdict2 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black')
-    whiskerdict1, whiskerdict2 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black')
+    boxdict1, boxdict2,boxdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2,color='black'),dict(linestyle='-', linewidth=2, color='black')
+    whiskerdict1, whiskerdict2 ,whiskerdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black'),dict(linestyle='-', linewidth=2, color='black')
     mediandict = dict(linestyle='--', linewidth=1.5, color='red')
 
     fig1, ax1 = plt.subplots(1,1,figsize=(10,7))
@@ -48,12 +48,29 @@ def boxplot(data, title='Boxplot'):
     ax1.set_title(title)
 
     bplot = ax1.boxplot(data, patch_artist=False, widths = 0.2, showfliers=True, showcaps=False, boxprops=boxdict1, whiskerprops=whiskerdict1, medianprops=mediandict, labels=labels)
-
-    for i in range(2):
+    
+    np.random.seed(0)
+    
+    for i in range(3):
         y = data[i]
         x = np.random.normal(i+1, 0.04, size=len(y))
         ax1.plot(x, y, 'r.', alpha=1)
+        
 
     ax1.yaxis.grid(True)
     ax1.set_xlabel('')
     ax1.set_ylabel('Accuracy (%)')
+    
+    # mean acc
+    mean_acc_train = torch.mean(data[0])
+    mean_acc_validation = torch.mean(data[1])
+    mean_acc_test = torch.mean(data[2])
+    # std acc
+    std_acc_train = torch.std(data[0])
+    std_acc_validation = torch.std(data[1])
+    std_acc_test = torch.std(data[2])
+    
+    print('Training |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_train, std_acc_train))
+    print('Validation |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_validation, std_acc_validation))
+    print('Test |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_test, std_acc_test))
+

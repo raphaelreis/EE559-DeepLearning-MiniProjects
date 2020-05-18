@@ -83,7 +83,7 @@ def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100,
     opt_prob = drop_prob[idx[1].item()]
     opt_hidden_layer = hidden_layers[idx[2].item()]
 
-    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.2f} ,dropout rate = {:.2f} andnb_hidden = {:.2f}'.format(len(seeds), 
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f} ,dropout rate = {:.2f} andnb_hidden = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[1].item()],opt_lr, opt_prob, opt_hidden_layer))
                     
     return train_results, test_losses, test_accuracies,opt_lr, opt_prob, opt_hidden_layer
@@ -102,7 +102,7 @@ def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100,
         for idx,prob_ws in enumerate(drop_prob_ws):
             for idy,prob_comp in enumerate(drop_prob_comp) :
                 for n, seed in enumerate(seeds):
-                    print('lr : {:.4f} , prob_ws : {:.2f}, prob_comp : {:d} (n= {:d})'.format(eta,prob_ws, prob_comp, n))
+                    print('lr : {:.4f} , prob_ws : {:.2f}, prob_comp : {:.2f} (n= {:d})'.format(eta,prob_ws, prob_comp, n))
 
                     # set seed
                     torch.manual_seed(seed)
@@ -152,9 +152,9 @@ def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100,
 
     opt_lr = lrs[idx[0].item()]
     opt_prob_ws = drop_prob_ws[idx[1].item()]
-    opt_prob_comp = drop_prob_comb[idx[2].item()]
+    opt_prob_comp = drop_prob_comp[idx[2].item()]
     
-    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.2f} ,dropout rate ws = {:.2f} and dropout rate comp = {:.2f}'.format(len(seeds), 
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f} ,dropout rate ws = {:.2f} and dropout rate comp = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[1].item()],opt_lr, opt_prob_ws, opt_prob_comp))
                     
     return train_results, test_losses, test_accuracies,opt_lr, opt_prob_ws, opt_prob_comp
@@ -221,10 +221,10 @@ def grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=10
                 idx=idx[0]
     
     opt_lr = lrs[idx[0].item()]
-    drop_prob_aux = drop_prob_aux[idx[1].item()]
-    drop_prob_comp = drop_prob_comp[idx[2].item()]
+    opt_prob_aux = drop_prob_aux[idx[1].item()]
+    opt_prob_comp = drop_prob_comp[idx[2].item()]
 
-    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.2f}  dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f}  dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[2].item()],opt_lr, drop_prob_aux, drop_prob_comp))
                     
-    return train_results, test_losses, test_accuracies,opt_lr, drop_prob_aux, drop_prob_comp
+    return train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp

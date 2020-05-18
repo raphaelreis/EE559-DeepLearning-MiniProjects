@@ -16,7 +16,7 @@ class Nets () :
         
         super(Nets, self).__init__()
   
-        self.Net2c = {'net_type' : 'Net2c', 'net' : Net2C , 'learning rate' : 0.001, 'hidden_layers': 100, 'drop_prob' :0.1 }
+        self.Net2c = {'net_type' : 'Net2c', 'net' : Net2C , 'learning rate' : 0.001, 'hidden_layers': 100, 'drop_prob' :0.0 }
         self.LeNet_sharing = {'net_type' : 'LeNet_sharing', 'net' : LeNet_sharing , 'learning rate' : 0.001, 'hidden_layers': 100,
                               'drop_prob_ws':0,'drop_prob_comb': 0}
         self.LeNet_sharing_aux = {'net_type' : 'LeNet_sharing_aux', 'net' : LeNet_sharing_aux , 'learning rate' : 0.001, 
@@ -51,10 +51,10 @@ class Nets () :
                                 criterion = nn.CrossEntropyLoss(),n_epochs=40, lambda_l2 = 0, rotate =False,translate=False,
                                 swap_channel = False, GPU=False):
         
-        train_results, test_losses, test_accuracies,opt_lr, drop_prob_aux, drop_prob_comp = grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.Adam,criterion= nn.CrossEntropyLoss(),n_epochs=40,lambda_l2 = 0, alpha=0.5, beta=0.5,rotate=False,translate=False, swap_channel = False, GPU=False)
+        train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp = grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.Adam,criterion= nn.CrossEntropyLoss(),n_epochs=40,lambda_l2 = 0, alpha=0.5, beta=0.5,rotate=False,translate=False, swap_channel = False, GPU=False)
         
         self.LeNet_sharing_aux['learning rate'] = opt_lr
-        self.LeNet_sharing_aux['drop_prob_aux'] = opt_prob_ws
+        self.LeNet_sharing_aux['drop_prob_aux'] = opt_prob_aux
         self.LeNet_sharing_aux['drop_prob_comp'] = opt_prob_comp
         
         return train_results, test_losses, test_accuracies
