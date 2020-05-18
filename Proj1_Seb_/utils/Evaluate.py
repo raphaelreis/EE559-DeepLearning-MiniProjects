@@ -134,7 +134,7 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
         
         print('Seed {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
     
-    data = torch.stack([train_results[:,1,39], train_results[:,3,39] , torch.tensor(test_accuracies)])
+    data = torch.stack([train_results[:,1,(n_epochs-1)], train_results[:,3,(n_epochs-1)] , torch.tensor(test_accuracies)])
     
     if statistics :
         boxplot(data)

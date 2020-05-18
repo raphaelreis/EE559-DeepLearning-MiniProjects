@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 import sys
 import numpy as np
 sys.path.append('..')
+import torch
 
 # simple learning curve for visualization of training over epochs
 

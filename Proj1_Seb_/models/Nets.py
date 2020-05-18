@@ -21,7 +21,7 @@ class Nets () :
                               'drop_prob_ws':0,'drop_prob_comb': 0}
         self.LeNet_sharing_aux = {'net_type' : 'LeNet_sharing_aux', 'net' : LeNet_sharing_aux , 'learning rate' : 0.001, 
                                   'hidden_layers_aux':200,'hidden_layers_comp':60,'drop_prob_aux':0.2,'drop_prob_comb': 0}
-        self.Google_Net = {'net_type' : 'Google_Net', 'net' : LeNet_sharing_aux , 'learning rate' : 0.001,'channels_1x1' : 64,
+        self.Google_Net = {'net_type' : 'Google_Net', 'net' : Google_Net, 'learning rate' : 0.001,'channels_1x1' : 64,
                            'channels_3x3' : 64,'channels_5x5' : 64,'pool_channels' : 64,'hidden_layers':200,
                            'drop_prob_comb':0,'drop_prob_aux': 0.7}
     
