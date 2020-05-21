@@ -8,7 +8,20 @@ import torch
 
 def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
 
-    """ Plots learning curve over training epochs for single model """
+    """ 
+    
+     General : Plots learning curve over training epochs for a single training 
+     
+     Input :
+     
+         - tr_losses : tensor of the losses of shape (n_epochs,)
+         - tr_accuracies : tensor of the accuracies of shape (n_epochs,)
+         - valid_losses : tensor of the losses of shape (n_epochs,)
+         - valid_accuracies : tensor of the accuracies of shape (n_epochs,)
+         
+     Output : Graph of the learning curves (losses and accuracies) for the training and validation set
+    
+    """
     
     fig, ax1 = plt.subplots()
     ax1.set_xlabel('Epochs')
@@ -27,7 +40,7 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
 
     plt.show()
     
-# to do boxplot
+# Boxplot
 
 def boxplot(data, title='Boxplot'):
 

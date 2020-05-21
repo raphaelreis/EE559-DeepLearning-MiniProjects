@@ -14,14 +14,32 @@ from utils.plot import learning_curve, boxplot
 from utils.metrics import accuracy, compute_nb_errors, compute_metrics
 from utils.training import train_model
 import torch.cuda as cuda
-
-# simple validation 
+ 
 
 def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criterion = nn.CrossEntropyLoss(), n_epochs=40, 
                    eta=1e-3, lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,rotate = False,translate=False,
                    swap_channel = False,GPU=False): 
 
-    """ Training / validation over n_epochs + testing a full test set"""
+    """ 
+    
+    General :
+         
+         - Train a network model  which weights has been initialized with a specific seed over n_epochs 
+         - Data is created with the same seed : train,validation and test calling the prologue
+         - Record the train and validation accuracy and loss and can display they evolution curve
+     
+     
+     Input :
+     
+         - Net : A network dictionnary from the <Nets> class
+         - seed : seed for pseudo random number generator used in weight initialization and data loading
+         -> mini_batch_size,optimizer, criterion, n_epochs, eta, lambda_2, alpha, beta see training.py
+         - plot : if true plot the learning curve evolution over the epochs -> default true
+         -> rotate,translate and swap_channels -> data augmentation see loader.py 
+     
+     Output : printed loss and accuracy of the network after training on the test set and learning curve if plot true
+     
+    """
     
     # set the pytorch seed
     torch.manual_seed(seed)
@@ -67,7 +85,8 @@ def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criter
 
 
     model =model.to(device)
-        
+    
+    # train the model on the train set and validate at each epoch    
     train_losses, train_acc, valid_losses, valid_acc = train_model(model, train_data_split, validation_data, device, mini_batch_size,
                                                                    optimizer,criterion,n_epochs, Net['learning rate'],lambda_l2,
                                                                    alpha, beta)
@@ -75,7 +94,8 @@ def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criter
     if plot:
         
         learning_curve(train_losses, train_acc, valid_losses, valid_acc)
-
+    
+    # loss and accuracy of the network on the test
     test_loss, test_accuracy = compute_metrics(model, test_data, device)
     
     print('\nTest Set | Loss: {:.4f} | Accuracy: {:.2f}%\n'.format(test_loss, test_accuracy))
@@ -83,14 +103,47 @@ def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criter
 
 ########################################################################################################################################
 
-# evaluation and final prediction statistics on large test set
+# evaluation and final prediction statistics on test set
 
 def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, criterion = nn.CrossEntropyLoss(), n_epochs=40, eta = 1e-3,
                    lambda_l2 = 0, alpha=0.5, beta=0.5, plot=True,statistics = True ,rotate = False,translate=False,swap_channel = False,
                    GPU=False): 
     
-    """ 10 rounds of training / validation + testing metrics statistics  """
+    """ 
+    General : 10 rounds of network training / validation with statistics
+         
+         - Repeat the training/validation procedure 10 times for ten different seeds in seeds
+             1) At every seed -> reinitializes a network and a dataset : train,validation and test 
+             2) Weights initialization and data loading are using the seed 
+             3) Record the train and validation accuracy and loss and can display their evolution curve
+             4) Compute the statistics at the end of each training for performance evaluation
+                 i)  Mean training accuracy for each seed -> value at the end of the last epoch
+                 ii) Mean validation accuracy for each seed -> value at the end of the last epoch
+                 iii) Mean test accuracy for each seed -> compute the accuracy on the test after each training
+                 -> display a boxplot of the statistics if statistics is true and print the mean and standard deviation
+     
+     Input :
+     
+         - Net : A network dictionnary from the <Nets> class
+         - seeds : a list of seed to iterate over for pseudo random number generator used in weight initialization and data loading
+         -> mini_batch_size,optimizer, criterion, n_epochs, eta, lambda_2, alpha, beta see training.py
+         - plot : if true plot the learning curve evolution over the epochs -> default true
+         - statistics : if true display the boxplot of the train accuracies, validations and test and print the mean and standard deviation 
+                        statistics
+         -> rotate,translate and swap_channels -> data augmentation see loader.py 
+     
+     Output : 
+     
+         - train_result : A (10x4xn_epochs) tensor 
+                             10 -> seed
+                             4 -> train loss ,train accuracy, validation loss, validation accuracy
+                             n_epochs -> evolution during training
+         - test_losses : A tensor of shape (10,) containing the test loss at each seed
+         - test_accuracies : A tensor of shape (10,) containing the test loss at each seed
+         
+    """
     
+    # tensor initialization to store the metrics
     train_results = torch.empty(len(seeds), 4, n_epochs)
     test_losses = []
     test_accuracies = []
@@ -104,6 +157,7 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
         # set the seed for random spliting of the dataset in training and validation
         random.seed(0)
         
+        # load the dataset train,validation and test
         data = PairSetMNIST()
         train_data = Training_set(data)
         test_data = Test_set(data)
@@ -140,21 +194,28 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
 
         model = model.to(device)
         
+        # train the model on the train set and validate at each epoch 
         train_losses, train_acc, valid_losses, valid_acc = train_model(model, train_data_split, validation_data, device, mini_batch_size,
                                                                        optimizer,criterion,n_epochs, Net['learning rate'],lambda_l2,
                                                                        alpha, beta)
+        # store the training and validation accuracies and losses during the training 
         train_results[n,] = torch.tensor([train_losses, train_acc, valid_losses, valid_acc])
+        # compute the loss and accuracy of the model on the test set
         test_loss, test_acc = compute_metrics(model, test_data, device)
+        # store the test metrics in the list
         test_losses.append(test_loss)
         test_accuracies.append(test_acc)
         
+        # learning curve
         if plot:
             learning_curve(train_losses, train_acc, valid_losses, valid_acc)
         
         print('Seed {:d} | Test Loss: {:.4f} | Test Accuracy: {:.2f}%\n'.format(n, test_loss, test_acc))
     
+    # store the train, validation and test accuracies in a tensor for the boxplot
     data = torch.stack([train_results[:,1,(n_epochs-1)], train_results[:,3,(n_epochs-1)] , torch.tensor(test_accuracies)])
     
+    # boxplot
     if statistics :
         Title = Net['net_type'] + " Accuracies"
         boxplot(data, Title)

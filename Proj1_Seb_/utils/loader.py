@@ -7,9 +7,9 @@ from torch.utils.data import Dataset, DataLoader
 
 
 def load():
-    '''Load the data in the format required by the project
+    '''Load the data in the format required by the project from the prologue file given
     
-        Returns: tuple
+        Returns : tuple
         
         tuple[0]: train
         tuple[1]:target
@@ -17,19 +17,30 @@ def load():
     '''
     return prologue.generate_pair_sets(1000)
 
-####################################################################################################################3
+##########################################################################################################################################
 
 class PairSetMNIST(Dataset):
     
     """
-    Generate train input, labels, and classes set from load()
-    Data can be augmented in three ways: 
-        1) Rotatation of the digits by 90,180 and 270 degrees except for digits 6 and 9 to avoid confusion
-        2) translation one pixel upward,downward,left and right
-        3) swap the order of the two digits channels
-    Everything can be done together or individually
+     A class that inherite from Dataset of pytorch to automatically handle batches and shuffling of the data when passed to a dataloader
+     
+     Load the train and test data from load()
+     
+     Initialize the classes attribut with the train and test data :
+      
+         - train_input : 1000x2x14x14 (two-channels images)
+         - train_target : 1000x1 (target -> digit in the first channel lesser or equal to the one in the second channel)
+         - train_classes :  1000x2 contain the label of each digit in the pair of digit
+         
+         - test_input : 1000x2x14x14 (two-channels images)
+         - test_target : 1000x1 (target -> digit in the first channel lesser or equal to the one in the second channel)
+         - test_classes :  1000x2 contain the label of each digit in the pair of digit
+     
+     => This class will be needed as an input of the other classes to separate this dataset in specific datasets : train,validation and 
+        test on which we can call a data loader from pytorch
     """
     
+    # constructor
     def __init__(self) :
             
         train_input, train_target, train_classes, test_input, test_target,test_classes=load()
@@ -46,7 +57,7 @@ class PairSetMNIST(Dataset):
         self.test_target = test_target
         self.test_classes = test_classes
        
-               
+    # iterator             
     def __getitem__(self, index ):
         
         return self.train_input[index], self.train_target[index], self.train_classes[index], self.test_input[index],                       self.test_target[index],self.test_classes[index]
@@ -55,8 +66,13 @@ class PairSetMNIST(Dataset):
 
 class Test_set(Dataset) :
     """
-    Test set created from PairSetMNIST 
+     A class that inherite from Dataset of pytorch to automatically handle batches and shuffling of the data when passed to a dataloader
+     
+     Input : PairSetMNIST 
+     
+     Only keep the test set in the attribut of the class defined as in PairSetMNIST
     """
+    # constructor
     def __init__(self,PairSetMNIST) :
         
         self.len = PairSetMNIST.test_input.shape[0]
@@ -64,11 +80,12 @@ class Test_set(Dataset) :
         self.test_target  = PairSetMNIST.test_target
         self.test_classes = PairSetMNIST.test_classes
        
-               
+    # iterator          
     def __getitem__(self, index):
         
         return self.test_input[index], self.test_target[index], self.test_classes[index]
-
+    
+    
     def __len__(self):
 
         return self.len
@@ -77,8 +94,18 @@ class Test_set(Dataset) :
     
 class Training_set (Dataset) :
     """
-    Training set created from PairSetMNIST 
-    Can split the training set in a 80 % training and 20 % validation randomly
+    A class that inherite from Dataset of pytorch to automatically handle batches and shuffling of the data when passed to a dataloader
+     
+    Input : PairSetMNIST 
+     
+    Only keep the train set in the attribut of the class defined as in PairSetMNIST
+    
+    Randomly split the indices of the train_input tensor :
+        
+        - train_idx -> 0.8 of the training pair
+        - valid_idx -> 0.2 of the training pair
+        
+    => This class will be needed to split the train in a train and valid dataset by using the list of indices split in this class
     """
     
     def __init__(self,PairSetMNIST) : 
@@ -109,9 +136,24 @@ class Training_set (Dataset) :
             
 class Training_set_split(Dataset) :
     """
-    Training set splitted  from Training set
+    A class that inherite from Dataset of pytorch to automatically handle batches and shuffling of the data when passed to a dataloader
+     
+    Input : Training_set -> set as training the indices of training from Training_set
+    
+    Parameters :
+        
+        - rotate : if true rotate each digit in the pair of digit by 90, 180,270 degrees except 6 and 9 to avoid confusion
+        - translate : if true translate the original digit in four direction 
+                       -> by one pixel upward
+                       -> by one pixel downward
+                       -> by one pixel to the right
+                       -> by one pixel to the left
+        - swap_channels : if True swap the channels 
+        
+        => data augmentation on the training set
     """
     
+    # Constructor
     def __init__(self,Training_set,rotate,translate,swap_channel) :
         
         train_input =  Training_set.train_input[Training_set.train_idx]
@@ -145,7 +187,9 @@ class Training_set_split(Dataset) :
             train_target = torch.cat((train_target,train_target,train_target,train_target),dim=0)
               
         if (translate == True) :
+            # get the value of the background pixel to set the pixel value  at the boundary in the opposite of the direction of translation
             background = train_input[0,0,0,0]
+            # initialize tensors where to put the translated images
             upward = torch.zeros(800,2,14,14)
             downward = torch.zeros(800,2,14,14)
             left = torch.zeros(800,2,14,14)
@@ -168,15 +212,18 @@ class Training_set_split(Dataset) :
             
         if (swap_channel==True):
             
+            # swap the channels by using the flip function from pytorch
             train_input = torch.cat((train_input, train_input.flip(1)), dim=0)
             train_classes = torch.cat((train_classes, train_classes.flip(1)), dim=0)
             train_target = torch.cat((train_target, (train_classes.flip(1)[:,0] <= train_classes.flip(1)[:,1]).long()),dim=0)
         
+        # training 
         self.len = train_input.shape[0]
         self.train_input =  train_input
         self.train_target  = train_target
         self.train_classes = train_classes
     
+    # iterator
     def __getitem__(self,index) : 
         
         return self.train_input[index], self.train_target[index], self.train_classes[index]
@@ -189,9 +236,12 @@ class Training_set_split(Dataset) :
     
 class Validation_set(Dataset) :
     """
-    Validation set splitted  from Training set
+    A class that inherite from Dataset of pytorch to automatically handle batches and shuffling of the data when passed to a dataloader
+     
+    Input : Training_set -> set as validation the indices of validation from Training_set 
     """
     
+    # Constructor
     def __init__(self,Training_set) :
         
         self.len = len(Training_set.valid_idx)
@@ -199,6 +249,7 @@ class Validation_set(Dataset) :
         self.valid_target  = Training_set.train_target[Training_set.valid_idx]
         self.valid_classes = Training_set.train_classes[Training_set.valid_idx]
     
+    # iterator 
     def __getitem__(self,index) : 
         
         return self.valid_input[index], self.valid_target[index], self.valid_classes[index]
