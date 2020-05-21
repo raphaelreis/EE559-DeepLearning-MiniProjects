@@ -40,11 +40,11 @@ def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100,
                     #set the random seed 
                     random.seed(0)
 
-                    # create the data
-                    data = PairSetMNIST( rotate,translate,swap_channel)
+                    # create the dataset 
+                    data = PairSetMNIST()
                     train_data = Training_set(data)
                     test_data = Test_set(data)
-                    train_data_split =Training_set_split(train_data)
+                    train_data_split =Training_set_split(train_data,rotate,translate,swap_channel)
                     validation_data= Validation_set(train_data)
 
                     # create the network
@@ -83,12 +83,12 @@ def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100,
     opt_prob = drop_prob[idx[1].item()]
     opt_hidden_layer = hidden_layers[idx[2].item()]
 
-    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f} ,dropout rate = {:.2f} andnb_hidden = {:.2f}'.format(len(seeds), 
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f} ,dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[1].item()],opt_lr, opt_prob, opt_hidden_layer))
                     
     return train_results, test_losses, test_accuracies,opt_lr, opt_prob, opt_hidden_layer
 
-############################################################################################################################################
+###########################################################################################################################################
 
 def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.Adam,criterion = nn.CrossEntropyLoss(), 
                    n_epochs=40, lambda_l2 = 0,alpha=0.5, beta=0.5, rotate = False,translate=False, swap_channel = False, GPU=False) :
@@ -112,10 +112,10 @@ def grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100,
                     random.seed(0)
 
                     # create the data
-                    data = PairSetMNIST( rotate,translate,swap_channel)
+                    data = PairSetMNIST()
                     train_data = Training_set(data)
                     test_data = Test_set(data)
-                    train_data_split =Training_set_split(train_data)
+                    train_data_split =Training_set_split(train_data,rotate,translate,swap_channel)
                     validation_data= Validation_set(train_data)
 
                     # create the network
@@ -183,10 +183,10 @@ def grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=10
                     random.seed(0)
 
                     # create the data
-                    data = PairSetMNIST( rotate,translate,swap_channel)
+                    data = PairSetMNIST()
                     train_data = Training_set(data)
                     test_data = Test_set(data)
-                    train_data_split =Training_set_split(train_data)
+                    train_data_split =Training_set_split(train_data,rotate,translate,swap_channel)
                     validation_data= Validation_set(train_data)
 
                     # create the network
@@ -228,3 +228,4 @@ def grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=10
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[2].item()],opt_lr, opt_prob_aux, opt_prob_comp))
                     
     return train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp
+###########################################################################################################################################

@@ -71,7 +71,7 @@ def boxplot(data, title='Boxplot'):
     std_acc_validation = torch.std(data[1])
     std_acc_test = torch.std(data[2])
     
-    print('Training |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_train, std_acc_train))
-    print('Validation |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_validation, std_acc_validation))
-    print('Test |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}%\n'.format( mean_acc_test, std_acc_test))
+    print('Training |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_train, std_acc_train))
+    print('Validation |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_validation, std_acc_validation))
+    print('Test |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_test, std_acc_test))
 

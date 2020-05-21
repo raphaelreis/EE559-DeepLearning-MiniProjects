@@ -30,24 +30,34 @@ def validate_model(Net,seed, mini_batch_size=100, optimizer = optim.Adam, criter
     # set the seed for random spliting of the dataset in training and validation
     random.seed(0)
     
-    
-    data = PairSetMNIST( rotate,translate,swap_channel)
+    # create the dataset 
+    data = PairSetMNIST()
     train_data = Training_set(data)
     test_data = Test_set(data)
-    train_data_split =Training_set_split(train_data)
+    train_data_split =Training_set_split(train_data,rotate,translate,swap_channel)
     validation_data= Validation_set(train_data)
-
+    
+    
+    # construct the net type with default parameter 
     if (Net['net_type'] == 'Net2c') :
         model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_prob = Net['drop_prob'])
     if (Net['net_type'] == 'LeNet_sharing') :
-        model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comb = Net['drop_prob_comb'])
+        model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comp = Net['drop_prob_comp'])
     if (Net['net_type'] == 'LeNet_sharing_aux') :
-        model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
-                           drop_prob_aux =Net['drop_prob_aux'],drop_prob_comp = Net['drop_prob_comb'])
+        # check if any data augmentation has been called
+        # if none construct with tuned parameters without data augmentation
+        # if yes construct with tuned parameters with data augmentation
+        if ( rotate == False and translate == False and swap_channel == False) :
+            model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
+                               drop_prob_aux =Net['drop_prob_aux'],drop_prob_comp = Net['drop_prob_comp'])
+        else :
+            Net['learning rate'] = Net['learning rate augm']
+            model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
+                               drop_prob_aux =Net['drop_prob_aux_augm'],drop_prob_comp = Net['drop_prob_comp_augm'])       
     if (Net['net_type'] == 'Google_Net') :
         model = Net['net'](channels_1x1 = Net['channels_1x1'],
                            channels_3x3 = Net['channels_3x3'],channels_5x5=Net['channels_5x5'],pool_channels = Net['pool_channels'],
-                           nhidden = Net['hidden_layers'], drop_prob_comp = Net['drop_prob_comb'],drop_prob_aux = Net['drop_prob_aux'])
+                           nhidden = Net['hidden_layers'], drop_prob_comp = Net['drop_prob_comp'],drop_prob_aux = Net['drop_prob_aux'])
         
 
     if GPU and cuda.is_available():
@@ -94,23 +104,32 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
         # set the seed for random spliting of the dataset in training and validation
         random.seed(0)
         
-        data = PairSetMNIST(rotate,translate,swap_channel)
+        data = PairSetMNIST()
         train_data = Training_set(data)
         test_data = Test_set(data)
-        train_data_split =Training_set_split(train_data)
+        train_data_split =Training_set_split(train_data,rotate,translate,swap_channel)
         validation_data= Validation_set(train_data)
         
+        # construct the net type with default parameter 
         if (Net['net_type'] == 'Net2c') :
             model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_prob = Net['drop_prob'])
         if (Net['net_type'] == 'LeNet_sharing') :
-            model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comb = Net['drop_prob_comb'])
+            model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comb = Net['drop_prob_comp'])
         if (Net['net_type'] == 'LeNet_sharing_aux') :
-            model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
-                               drop_prob_aux =Net['drop_prob_aux'],drop_prob_comp = Net['drop_prob_comb'])
+            # check if any data augmentation has been called
+            # if none construct with tuned parameters without data augmentation
+            # if yes construct with tuned parameters with data augmentation
+            if (  rotate == False and translate == False and swap_channel == False) :
+                model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
+                                   drop_prob_aux =Net['drop_prob_aux'],drop_prob_comp = Net['drop_prob_comp'])
+            else :
+                Net['learning rate'] = Net['learning rate augm']
+                model = Net['net'](nbhidden_aux = Net['hidden_layers_aux'],nbhidden_comp = Net['hidden_layers_comp'],
+                                   drop_prob_aux =Net['drop_prob_aux_augm'],drop_prob_comp = Net['drop_prob_comp_augm'])       
         if (Net['net_type'] == 'Google_Net') :
             model = Net['net'](channels_1x1 = Net['channels_1x1'],
                                channels_3x3 = Net['channels_3x3'],channels_5x5=Net['channels_5x5'],pool_channels = Net['pool_channels'],
-                               nhidden = Net['hidden_layers'], drop_prob_comp = Net['drop_prob_comb'],drop_prob_aux = Net['drop_prob_aux'])
+                               nhidden = Net['hidden_layers'], drop_prob_comp = Net['drop_prob_comp'],drop_prob_aux = Net['drop_prob_aux'])
          
 
         if GPU and cuda.is_available():
@@ -120,7 +139,7 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
 
 
         model = model.to(device)
-
+        
         train_losses, train_acc, valid_losses, valid_acc = train_model(model, train_data_split, validation_data, device, mini_batch_size,
                                                                        optimizer,criterion,n_epochs, Net['learning rate'],lambda_l2,
                                                                        alpha, beta)
@@ -137,7 +156,8 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
     data = torch.stack([train_results[:,1,(n_epochs-1)], train_results[:,3,(n_epochs-1)] , torch.tensor(test_accuracies)])
     
     if statistics :
-        boxplot(data)
+        Title = Net['net_type'] + " Accuracies"
+        boxplot(data, Title)
 
     return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 

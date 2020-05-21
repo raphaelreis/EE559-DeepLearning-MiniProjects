@@ -30,65 +30,11 @@ class PairSetMNIST(Dataset):
     Everything can be done together or individually
     """
     
-    def __init__(self,rotate,translate,swap_channel) :
+    def __init__(self) :
             
         train_input, train_target, train_classes, test_input, test_target,test_classes=load()
         
         train_input = train_input.sub(train_input.mean()).div(train_input.std())
-            
-        #Data augmentation
-        if (rotate == True) :
-            # find indices of 6 and 9 digits not to rotate them
-            indices_9 = (train_classes == 9)
-            index_9 = indices_9.nonzero()
-            indices_6 = (train_classes == 6)
-            index_6 = indices_6.nonzero()
-            
-            # rotate the images
-            empty_images90= torch.rot90(train_input,1,[2,3])
-            empty_images180= torch.rot90(train_input,2,[2,3])
-            empty_images270= torch.rot90(train_input,3,[2,3])
-            
-            # replace the rotated 6 and 9 by the original 
-            empty_images90[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
-            empty_images90[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
-            empty_images180[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
-            empty_images180[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
-            empty_images270[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
-            empty_images270[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
-            
-            # Concatenate the rotated images to the data
-            train_input = torch.cat((train_input,empty_images90,empty_images180,empty_images270),dim=0)
-            train_classes = torch.cat((train_classes,train_classes, train_classes,train_classes), dim=0)
-            train_target = torch.cat((train_target,train_target,train_target,train_target),dim=0)
-              
-        if (translate == True) :
-            background = train_input[0,0,0,0]
-            upward = torch.zeros(1000,2,14,14)
-            downward = torch.zeros(1000,2,14,14)
-            left = torch.zeros(1000,2,14,14)
-            right = torch.zeros(1000,2,14,14)
-            #translate images
-            upward[:,:,:-1,:] = train_input[:1000,:,1:,:]
-            downward[:,:,1:,:] = train_input[:1000,:,:-1,:]
-            left[:,:,:,:-1] = train_input[:1000,:,:,1:]
-            right[:,:,:,1:] = train_input[:1000,:,:,:-1]
-            #add the background value to the boundary
-            upward[:,:,13,:] = background
-            downward[:,:,0,:] = background
-            left[:,:,:,13] = background
-            right[:,:,:,0] = background
-            
-            #concatenate the translated images
-            train_input = torch.cat((train_input,upward,downward,left,right),dim=0)
-            train_classes = torch.cat((train_classes, train_classes[:1000],train_classes[:1000],train_classes[:1000],train_classes[:1000]), dim=0)
-            train_target = torch.cat((train_target,train_target[:1000],train_target[:1000],train_target[:1000],train_target[:1000]),dim=0)
-            
-        if (swap_channel==True):
-            
-            train_input = torch.cat((train_input, train_input.flip(1)), dim=0)
-            train_classes = torch.cat((train_classes, train_classes.flip(1)), dim=0)
-            train_target = torch.cat((train_target, (train_classes.flip(1)[:,0] <= train_classes.flip(1)[:,1]).long()),dim=0)
         
         # Training set
         self.train_input  = train_input
@@ -166,12 +112,70 @@ class Training_set_split(Dataset) :
     Training set splitted  from Training set
     """
     
-    def __init__(self,Training_set) :
+    def __init__(self,Training_set,rotate,translate,swap_channel) :
         
-        self.len = len(Training_set.train_idx)
-        self.train_input =  Training_set.train_input[Training_set.train_idx]
-        self.train_target  = Training_set.train_target[Training_set.train_idx]
-        self.train_classes = Training_set.train_classes[Training_set.train_idx]
+        train_input =  Training_set.train_input[Training_set.train_idx]
+        train_target  = Training_set.train_target[Training_set.train_idx]
+        train_classes = Training_set.train_classes[Training_set.train_idx]
+        
+        #Data augmentation
+        if (rotate == True) :
+            # find indices of 6 and 9 digits not to rotate them
+            indices_9 = (train_classes == 9)
+            index_9 = indices_9.nonzero()
+            indices_6 = (train_classes == 6)
+            index_6 = indices_6.nonzero()
+            
+            # rotate the images
+            empty_images90= torch.rot90(train_input,1,[2,3])
+            empty_images180= torch.rot90(train_input,2,[2,3])
+            empty_images270= torch.rot90(train_input,3,[2,3])
+            
+            # replace the rotated 6 and 9 by the original 
+            empty_images90[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
+            empty_images90[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
+            empty_images180[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
+            empty_images180[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
+            empty_images270[index_9[:,0],index_9[:,1]] = train_input[index_9[:,0],index_9[:,1]]
+            empty_images270[index_6[:,0],index_6[:,1]] = train_input[index_6[:,0],index_6[:,1]]
+            
+            # Concatenate the rotated images to the data
+            train_input = torch.cat((train_input,empty_images90,empty_images180,empty_images270),dim=0)
+            train_classes = torch.cat((train_classes,train_classes, train_classes,train_classes), dim=0)
+            train_target = torch.cat((train_target,train_target,train_target,train_target),dim=0)
+              
+        if (translate == True) :
+            background = train_input[0,0,0,0]
+            upward = torch.zeros(1000,2,14,14)
+            downward = torch.zeros(1000,2,14,14)
+            left = torch.zeros(1000,2,14,14)
+            right = torch.zeros(1000,2,14,14)
+            #translate images
+            upward[:,:,:-1,:] = train_input[:1000,:,1:,:]
+            downward[:,:,1:,:] = train_input[:1000,:,:-1,:]
+            left[:,:,:,:-1] = train_input[:1000,:,:,1:]
+            right[:,:,:,1:] = train_input[:1000,:,:,:-1]
+            #add the background value to the boundary
+            upward[:,:,13,:] = background
+            downward[:,:,0,:] = background
+            left[:,:,:,13] = background
+            right[:,:,:,0] = background
+            
+            #concatenate the translated images
+            train_input = torch.cat((train_input,upward,downward,left,right),dim=0)
+            train_classes = torch.cat((train_classes, train_classes[:1000],train_classes[:1000],train_classes[:1000],train_classes[:1000]), dim=0)
+            train_target = torch.cat((train_target,train_target[:1000],train_target[:1000],train_target[:1000],train_target[:1000]),dim=0)
+            
+        if (swap_channel==True):
+            
+            train_input = torch.cat((train_input, train_input.flip(1)), dim=0)
+            train_classes = torch.cat((train_classes, train_classes.flip(1)), dim=0)
+            train_target = torch.cat((train_target, (train_classes.flip(1)[:,0] <= train_classes.flip(1)[:,1]).long()),dim=0)
+        
+        self.len = train_input.shape[0]
+        self.train_input =  train_input
+        self.train_target  = train_target
+        self.train_classes = train_classes
     
     def __getitem__(self,index) : 
         
