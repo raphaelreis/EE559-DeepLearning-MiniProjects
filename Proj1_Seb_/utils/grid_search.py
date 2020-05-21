@@ -21,7 +21,7 @@ from models.Le_Net import LeNet_sharing_aux,LeNet_sharing
 
 def grid_search_basic(lrs,drop_prob, hidden_layers, seeds,  mini_batch_size=100, optimizer = optim.Adam,criterion = nn.CrossEntropyLoss(),
                       n_epochs=40, lambda_l2 = 0,alpha=0.5, beta=0.5, rotate = False,translate=False,swap_channel = False, GPU=False):
-    
+
     
     train_results = torch.empty(len(lrs),len(drop_prob),len(hidden_layers),len(seeds), 4, n_epochs)
     test_losses = torch.empty(len(lrs),len(drop_prob), len(hidden_layers), len(seeds))
@@ -224,7 +224,7 @@ def grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=10
     opt_prob_aux = drop_prob_aux[idx[1].item()]
     opt_prob_comp = drop_prob_comp[idx[2].item()]
 
-    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f}  dropout rate = {:.2f} and nb_hidden = {:.2f}'.format(len(seeds), 
+    print('Best mean validation accuracy on {:d} seeds : {:.2f}%, std = {:.2f} with: learning rate = {:.4f}  dropout rate aux = {:.2f} and dropout rate comp = {:.2f}'.format(len(seeds), 
                         validation_grid_mean_acc[idx[0].item(), idx[1].item(),idx[2].item()], validation_grid_std_acc[idx[0].item(), idx[1].item(),idx[2].item()],opt_lr, opt_prob_aux, opt_prob_comp))
                     
     return train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp
