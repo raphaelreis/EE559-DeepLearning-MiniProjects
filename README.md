@@ -4,11 +4,13 @@
 The Goal of this project is to implement different neural network structures to predict if a handwritten digit in the first channel is lesser or equal to the digit in the second channel and 
 in particular to test the impact of weight sharing and auxiliary losses.
 
-### Main 
+### Main
+The main.py file contain the executable of our project, it can be called as follows :
+  
 
 ### Data
 The data is taken from the MNIST dataset from Yann Lecun website. The lecturer of the EEE-559 lecture at epfl (Fleuret François) provides a python file (dlc_prologue.py) which generates 
-our dataset. The dataset is structured as folows :
+our dataset. The dataset is structured as follows :
 
    Name      | Tensor dimension | Type  |                 Content
 -------------|------------------|-------|-------------------------------------
