@@ -14,8 +14,7 @@ our dataset. The dataset is structured as folows :
 -------------|------------------|-------|-------------------------------------
 train input  | 1000x2x14x14     |float32|Images                 
 train target | 1000             | int64 |Class to predict {0,1}
-train classes| 1000x2           | int64 |Classes of the two digits {0,1,...,9}
--------------|------------------|-------|-------------------------------------          
+train classes| 1000x2           | int64 |Classes of the two digits {0,1,...,9}          
 test input   | 1000x2x14x14     |float32|Images 
 test target  | 1000             |int64  |Class to predict {0,1}
 test classes | 1000x2           |int64  |Classes of the two digits {0,1,...,9}
