@@ -10,6 +10,17 @@ in particular to test the impact of weight sharing and auxiliary losses.
 The data is taken from the MNIST dataset from Yann Lecun website. The lecturer of the EEE-559 lecture at epfl (Fleuret François) provides a python file (dlc_prologue.py) which generates 
 our dataset. The dataset is structured as folows :
 
+   Name      | Tensor dimension | Type  |                 Content
+-------------|------------------|-------|-------------------------------------
+train input  | 1000x2x14x14     |float32|Images                 
+train target | 1000             | int64 |Class to predict {0,1}
+train classes| 1000x2           | int64 |Classes of the two digits {0,1,...,9}
+-------------|------------------|-------|-------------------------------------          
+test input   | 1000x2x14x14     |float32|Images 
+test target  | 1000             |int64  |Class to predict {0,1}
+test classes | 1000x2           |int64  |Classes of the two digits {0,1,...,9}
+
+
 ### Models 
 This folder contain the networks class  implemented in this project using the pytorch library and a class which  contains a dictionnary of this class (name and parameters).
 
