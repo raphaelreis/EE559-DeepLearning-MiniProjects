@@ -10,3 +10,4 @@ in particular to test the impact of weight sharing and auxiliary losses.
 ### models 
 
 * Basic.py
+	* Class Net2c : A basic CNN without weight sharing and auxiliary losses 
