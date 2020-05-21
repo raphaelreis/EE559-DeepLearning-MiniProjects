@@ -146,15 +146,15 @@ class Training_set_split(Dataset) :
               
         if (translate == True) :
             background = train_input[0,0,0,0]
-            upward = torch.zeros(1000,2,14,14)
-            downward = torch.zeros(1000,2,14,14)
-            left = torch.zeros(1000,2,14,14)
-            right = torch.zeros(1000,2,14,14)
+            upward = torch.zeros(800,2,14,14)
+            downward = torch.zeros(800,2,14,14)
+            left = torch.zeros(800,2,14,14)
+            right = torch.zeros(800,2,14,14)
             #translate images
-            upward[:,:,:-1,:] = train_input[:1000,:,1:,:]
-            downward[:,:,1:,:] = train_input[:1000,:,:-1,:]
-            left[:,:,:,:-1] = train_input[:1000,:,:,1:]
-            right[:,:,:,1:] = train_input[:1000,:,:,:-1]
+            upward[:,:,:-1,:] = train_input[:800,:,1:,:]
+            downward[:,:,1:,:] = train_input[:800,:,:-1,:]
+            left[:,:,:,:-1] = train_input[:800,:,:,1:]
+            right[:,:,:,1:] = train_input[:800,:,:,:-1]
             #add the background value to the boundary
             upward[:,:,13,:] = background
             downward[:,:,0,:] = background
@@ -163,8 +163,8 @@ class Training_set_split(Dataset) :
             
             #concatenate the translated images
             train_input = torch.cat((train_input,upward,downward,left,right),dim=0)
-            train_classes = torch.cat((train_classes, train_classes[:1000],train_classes[:1000],train_classes[:1000],train_classes[:1000]), dim=0)
-            train_target = torch.cat((train_target,train_target[:1000],train_target[:1000],train_target[:1000],train_target[:1000]),dim=0)
+            train_classes = torch.cat((train_classes, train_classes[:800],train_classes[:800],train_classes[:800],train_classes[:800]), dim=0)
+            train_target = torch.cat((train_target,train_target[:800],train_target[:800],train_target[:800],train_target[:800]),dim=0)
             
         if (swap_channel==True):
             

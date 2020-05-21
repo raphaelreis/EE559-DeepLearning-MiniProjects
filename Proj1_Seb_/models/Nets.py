@@ -29,7 +29,7 @@ class Nets () :
     def Tune_Net2c(self,lrs,drop_prob, hidden_layers,seeds,mini_batch_size=100, optimizer = optim.Adam,criterion = nn.CrossEntropyLoss(),
                    n_epochs=40, lambda_l2 = 0, rotate =False,translate=False,swap_channel = False, GPU=False) :
         
-        train_results, test_losses, test_accuracies,opt_lr, opt_prob, opt_hidden_layer = grid_search_basic(lrs,drop_prob, hidden_layers, seeds,mini_batch_size=100, optimizer = optim.Adam,criterion = nn.CrossEntropyLoss(), n_epochs=40, lambda_l2 = 0, rotate =False,translate=False,swap_channel = False, GPU=False)
+        train_results, test_losses, test_accuracies,opt_lr, opt_prob, opt_hidden_layer = grid_search_basic(lrs,drop_prob, hidden_layers, seeds,mini_batch_size, optimizer ,criterion , n_epochs, lambda_l2 , rotate ,translate,swap_channel , GPU)
         
         self.Net2c['learning rate'] = opt_lr
         self.Net2c['drop_prob'] = opt_prob
@@ -40,7 +40,7 @@ class Nets () :
     def Tune_LeNet_sharing (self,lrs,drop_prob_ws, drop_prob_comp,seeds,mini_batch_size=100, optimizer = optim.Adam,
                             criterion = nn.CrossEntropyLoss(),n_epochs=40, lambda_l2 = 0, rotate =False,translate=False,
                             swap_channel = False, GPU=False):
-        train_results, test_losses, test_accuracies,opt_lr, opt_prob_ws, opt_prob_comp = grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.Adam,criterion = nn.CrossEntropyLoss(), n_epochs=40, lambda_l2 = 0,alpha=0.5, beta=0.5, rotate = False,translate=False, swap_channel = False, GPU=False)
+        train_results, test_losses, test_accuracies,opt_lr, opt_prob_ws, opt_prob_comp = grid_search_ws(lrs,drop_prob_ws, drop_prob_comp, seeds, mini_batch_size, optimizer ,criterion , n_epochs, lambda_l2 ,alpha, beta, rotate ,translate, swap_channel , GPU)
         
         self.LeNet_sharing['learning rate'] = opt_lr
         self.LeNet_sharing['drop_prob_aux'] = opt_prob_ws
@@ -52,7 +52,7 @@ class Nets () :
                                 criterion = nn.CrossEntropyLoss(),n_epochs=40, lambda_l2 = 0, rotate =False,translate=False,
                                 swap_channel = False, GPU=False):
         
-        train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp = grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size=100, optimizer = optim.Adam,criterion= nn.CrossEntropyLoss(),n_epochs=40,lambda_l2 = 0, alpha=0.5, beta=0.5,rotate=False,translate=False, swap_channel = False, GPU=False)
+        train_results, test_losses, test_accuracies,opt_lr, opt_prob_aux, opt_prob_comp = grid_search_aux(lrs,drop_prob_aux, drop_prob_comp, seeds, mini_batch_size, optimizer,criterion,n_epochs,lambda_l2 , alpha, beta,rotate,translate, swap_channel, GPU)
         
         if (rotate == True or translate == True or swap_channel == True) :
             self.LeNet_sharing_aux['learning rate augm'] = opt_lr
