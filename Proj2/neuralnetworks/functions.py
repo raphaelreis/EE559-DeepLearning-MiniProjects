@@ -1,3 +1,6 @@
+
+from .base import Module
+
 ###### Only for intellisense ###### noqa: E266
 import torch
 Tensor = torch.Tensor
@@ -10,9 +13,9 @@ def linear(input: Tensor, weights: Tensor, bias: Tensor = None) -> Tensor:
 
     '''Apply a linear transformation to the input.'''
 
-    output = input.t() @ weights
+    output = weights @ input
     if bias is not None:
-        output += bias
+        output.add(bias)
     return output
 
 
@@ -25,50 +28,100 @@ def tanh(input: Tensor) -> Tensor:
     return input.tanh()
 
 
+def d_tanh(input: Tensor) -> Tensor:
+    '''Hyperbolic angent derivative'''
+
+    return 1 - input.tanh().pow(2)
+
+
 def sigmoid(input: Tensor) -> Tensor:
     '''Sigmoid function'''
 
     return input.sigmoid()
 
-# def tanh_backward(dA: Tensor, Z: Tensor) -> Tensor:
-#     '''Backward activation function for tanh'''
 
-#     tanh_squared = Z.tanh().pow(2)
-#     return (dA - dA.matmul(tanh_squared))
+def d_sigmoid(x: Tensor) -> Tensor:
+    return (-x).exp() / (1 + (-x).exp()).pow(2)
 
 
-def relu(input: Tensor) -> Tensor:
-    '''Rectified linear unit'''
-
-    return input.relu()
+def relu(x):
+    return x * (x > 0).float()
 
 
-def relu_backward(dA: Tensor, Z: Tensor) -> Tensor:
-    '''Backward activation function for relu'''
+def d_relu(x):
+    return 1. * (x > 0).float()
 
-    dZ = dA.clone()
-    dZ[dZ <= 0] = 0
-    return dZ
+######################## Activation modules ######################## noqa: E266
 
 
-######################## Loss functions ######################## noqa: E266
+class ReLU(Module):
+    def __init__(self):
+        super(ReLU, self).__init__()
+        self.act = relu
+        self.d_act = d_relu
 
-def MSE(y_hat: Tensor, y: Tensor) -> Tensor:
+    def forward(self, x):
+        self.input = x
+        self.output = self.act(x)
+
+    def backward(self, delta_network):
+        delta_activation = delta_network * self.d_act(self.input).view(-1, 1)
+        return delta_activation
+
+
+class Sigmoid(Module):
+    def __init__(self):
+        super(Sigmoid, self).__init__()
+        self.act = sigmoid
+        self.d_act = d_sigmoid
+
+    def forward(self, x):
+        self.input = x
+        self.output = self.act(x)
+
+    def backward(self, delta_network):
+        delta_activation = delta_network * self.d_act(self.input).view(-1, 1)
+        return delta_activation
+
+
+class Tanh(Module):
+    def __init__(self):
+        super(Tanh, self).__init__()
+        self.act = tanh
+        self.d_act = d_tanh
+
+    def forward(self, x):
+        self.input = x
+        self.output = self.act(x)
+
+    def backward(self, delta_network):
+        delta_activation = delta_network * self.d_act(self.input).view(-1, 1)
+        return delta_activation
+
+######################## Loss function ######################## noqa: E266
+
+
+def mse(y_hat: Tensor, y: Tensor) -> Tensor:
     '''Mean squared error'''
 
     return (y_hat - y).pow(2).sum()
 
 
-def MSE_prime(y_hat: Tensor, y: Tensor) -> Tensor:
+def mse_prime(y_hat: Tensor, y: Tensor) -> Tensor:
     '''Derivative of the mean squared error'''
 
-    return -2 * (y_hat - y)
-
-############################ Utils ############################# noqa: E266
+    return 2 / y.shape[0] * (y_hat - y)
 
 
-def one_hot(y, dims=2):
-    y_hot = y.long().view(-1, 1).clone()
-    y_one_hot = torch.empty(y_hot.size()[0], dims).\
-        fill_(0.).scatter_(1, y_hot, 1)
-    return y_one_hot
+class MSE:
+    def __init__(self):
+        self.loss = mse
+        self.derivative = mse_prime
+
+    def __call__(self, output, target):
+        self.output = output
+        self.target = target
+        self.value = self.loss(output, target)
+
+    def derivate(self):
+        return self.derivative(self.output, self.target).view(-1, 1)

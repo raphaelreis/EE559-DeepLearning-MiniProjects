@@ -1,5 +1,9 @@
 import math
+
+import torch
 from torch import empty
+
+from .utils import one_hot
 
 CERCLE_RADIUS = 1./math.sqrt(2.*math.pi)
 DEFAULT_SAMPLESIZE = 1000
@@ -12,25 +16,22 @@ class DataGenerator:
     '''
     def __init__(self, sample_size=DEFAULT_SAMPLESIZE):
         self.sample_size = sample_size
+        self.X_train, self.y_train = self.gen(self.sample_size)
+        self.X_test, self.y_test = self.gen(self.sample_size)
 
-    def generate_data(self):
-        # Tensor.uniform_() generates by default in the range [0, 1]
-        # Train set
-        self.X_train, self.y_train = self.gen_dat(self.sample_size)
-
-        # Test set
-        self.X_test, self.y_test = self.gen_dat(self.sample_size)
-
-    def get_data(self):
-        '''Get the generated data'''
-
-        if not hasattr(self, 'X_train'):
-            raise AssertionError("Need to run generate_data() function first")
-
-        return self.X_train, self.y_train, self.X_test, self.y_test
-
-    def gen_dat(self, sample_size):
+    def gen(self, sample_size):
+        '''Generate the data with specified constrains'''
         X = empty(self.sample_size, 2).uniform_()
-        radii = X.pow(2).sum(axis=1).pow(1/2)
+        radii = (X-torch.ones(self.sample_size, 2) * 0.5).abs()\
+            .pow(2).sum(axis=1).pow(1/2)
         y = (radii <= CERCLE_RADIUS).int()
         return X, y
+
+    def get_data(self, oh=True):
+        '''Get the generated data'''
+
+        if oh:
+            return self.X_train, one_hot(self.y_train),\
+                self.X_test, one_hot(self.y_test)
+        else:
+            return self.X_train, self.y_train, self.X_test, self.y_test

@@ -1,76 +1,60 @@
 import logging
 import math
 
+import torch
 from torch import empty
 
 from .base import Module
-from .functions import linear, relu, relu_backward
+from .functions import linear
 
+torch.manual_seed(0)
 log = logging.getLogger("TestMLP")
 
 
 class Feedforward(Module):
     '''Fully connected neural network model'''
-    def __init__(self, input_features, output_features,
-                 activation='relu', bias=True):
+    def __init__(self, input_features, output_features, bias=True):
         super(Feedforward, self).__init__()
-        self.input_features = input_features
-        self.output_features = output_features
+        self.init_parameters(input_features, output_features, bias)
+        self.dl_dw = empty(output_features, input_features)
+        self.delta = empty(output_features, 1)
+        self.bias = bias
+
+    def init_parameters(self, input_features, output_features, bias):
+        self.W = kaimingHe_normal(output_features, input_features)
         if bias:
-            self.b = empty(output_features)
-        self.init_parameters()
-        self.activation = self.parse_activation(activation)
+            self.b = empty(output_features, 1).zero_()
 
-    def init_parameters(self):
-        # https://towardsdatascience.com/weight-initialization-in-neural-networks-a-journey-from-the-basics-to-kaiming-954fb9b47c79
-        self.W = xavier_normal(self.input_features, self.output_features)
-        if self.b is not None:
-            self.b.zero_()
-
-    def parse_activation(self, activation):
-        if activation == 'relu':
-            F = relu
-            dF = relu_backward
+    def forward(self, x):
+        self.input = x
+        if self.bias:
+            self.output = linear(x, self.W, self.b)
         else:
-            raise Exception("Not implemented activation function")
+            self.output = linear(x, self.W)
 
-        d = dict(F=F, dF=dF)
-        return d
+    def backward(self, delta):
+        self.delta = delta
+        self.dl_dw = self.delta @ self.input.unsqueeze(-2)
+        self.dl_db = self.delta
+        return self.W.t() @ self.delta
 
-    def forward(self, A):
-        self.input = A
-        self.Z = linear(A, self.W, self.b)
-        self.A = self.activation['F'](self.Z)
-        # log.debug("activated input: {}".format(self.A))
-
-    def backward(self, dA_prev, dA_current):
-        n = self.input.shape[0]
-        dZ = self.activation['dF'](dA_current, self.Z)
-        self.dW = (dA_prev.unsqueeze(1) @ dZ.unsqueeze(1).t()) / n
-        self.db = (dZ / n).squeeze()
-        self.dA_prev = (self.W @ dZ.unsqueeze(1)).squeeze()
-
-    def get_param(self):
-        if not hasattr(self, 'dW') or not hasattr(self, 'db'):
-            raise AssertionError("back propagation must be call first")
-        
-        return ((self.W, self.dW), (self.b, self.db))
-
-    def set_param(self, W, b):
-        self.W = W
-        self.b = b
+    def update(self, lr):
+        self.W = self.W - lr * self.dl_dw
+        if self.bias:
+            self.b = self.b - lr * self.delta
 
     def param(self):
-        return []
+        if self.bias:
+            return [self.W, self.dl_dw, self.b, self.delta]
+        else:
+            return [self.W, self.dl_dw]
+
+    def zero_grad(self):
+        self.delta.zero_()
+        self.dl_dw.zero_()
 
 
-def kaiming(input, output): 
-    '''Kaiming initialization'''
+def kaimingHe_normal(output_size, input_size):
+    std = math.sqrt(2. / (output_size))
+    return empty(output_size, input_size).normal_(0., std)
 
-    return empty(input, output).normal_()*math.sqrt(2./input)
-
-
-def xavier_normal(input, output):
-    '''Xavier initialization'''
-
-    return empty(input, output).normal_(0, math.sqrt(2./(input + output)))
