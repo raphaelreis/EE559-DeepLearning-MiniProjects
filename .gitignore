@@ -130,3 +130,4 @@ dmypy.json
 
 # data folder
 data
+.metals/metals.h2.db
