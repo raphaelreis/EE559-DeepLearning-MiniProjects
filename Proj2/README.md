@@ -11,19 +11,19 @@ Please check our report for this project here: [Porject2 report](https://github.
 
 The project is splitted in five folders:
 * analysis:
-> Notebook analysis and figures
+  Notebook analysis and figures
 * data generator
-> The class to generate the data
+  The class to generate the data
 * neuralnetworks:
 1. base.py: contains the parent class for all modules
-2. dropout.py
-3. feedforward.py
-4. functions.py: contains all the activation functions and loss functions
-5. sequential.py: contains the high level learning protocol for the deep network to solve the classification task
+2. dropout.py: dropout layer
+3. feedforward.py: fully connected layer
+4. functions.py: all the activation and loss functions
+5. sequential.py: high level learning protocol for the deep network to solve classification task
 * optimizer
-> Sochastic gradient descent optimizer
+  Sochastic gradient descent optimizer
 * test
-> unit testing
+  unit testing
 
 ### Prerequisites
 
