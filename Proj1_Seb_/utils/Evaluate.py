@@ -168,7 +168,7 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
         if (Net['net_type'] == 'Net2c') :
             model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_prob = Net['drop_prob'])
         if (Net['net_type'] == 'LeNet_sharing') :
-            model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comb = Net['drop_prob_comp'])
+            model = Net['net'](nb_hidden = Net['hidden_layers'],dropout_ws = Net['drop_prob_ws'],dropout_comp = Net['drop_prob_comp'])
         if (Net['net_type'] == 'LeNet_sharing_aux') :
             # check if any data augmentation has been called
             # if none construct with tuned parameters without data augmentation
@@ -214,11 +214,12 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
     
     # store the train, validation and test accuracies in a tensor for the boxplot
     data = torch.stack([train_results[:,1,(n_epochs-1)], train_results[:,3,(n_epochs-1)] , torch.tensor(test_accuracies)])
-    
+    data = data.view(1,3,10)
     # boxplot
     if statistics :
-        Title = Net['net_type'] + " Accuracies"
-        boxplot(data, Title)
+        Title = " Models accuracies"
+        models = [Net['net_type']]
+        boxplot(data, Title,models)
 
     return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 

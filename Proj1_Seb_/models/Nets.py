@@ -75,10 +75,10 @@ class Nets () :
   
         self.Net2c = {'net_type' : 'Net2c', 'net' : Net2C , 'learning rate' : 0.001, 'hidden_layers': 150, 'drop_prob' :0.2 }
         self.LeNet_sharing = {'net_type' : 'LeNet_sharing', 'net' : LeNet_sharing , 'learning rate' : 0.001, 'hidden_layers': 100,
-                              'drop_prob_ws':0.0,'drop_prob_comp': 0.3}
+                              'drop_prob_ws':0.5,'drop_prob_comp': 0.2}
         self.LeNet_sharing_aux = {'net_type' : 'LeNet_sharing_aux', 'net' : LeNet_sharing_aux , 'learning rate' : 0.01,
                                   'learning rate augm': 0.01,'hidden_layers_aux':200,'hidden_layers_comp':60,'drop_prob_aux':0.4,
-                                  'drop_prob_comp': 0.1,'drop_prob_aux_augm':0.2,'drop_prob_comp_augm': 0.05}
+                                  'drop_prob_comp': 0.1,'drop_prob_aux_augm':0.3,'drop_prob_comp_augm': 0.1}
         self.Google_Net = {'net_type' : 'Google_Net', 'net' : Google_Net, 'learning rate' : 0.001,'channels_1x1' : 64,
                            'channels_3x3' : 64,'channels_5x5' : 64,'pool_channels' : 64,'hidden_layers':200,
                            'drop_prob_comp':0,'drop_prob_aux': 0.7}

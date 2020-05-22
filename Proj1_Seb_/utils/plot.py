@@ -42,49 +42,71 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
     
 # Boxplot
 
-def boxplot(data, title='Boxplot'):
+def boxplot(data,title,models,save = False):
 
     """ 
-    plots a single boxplot for a single model type
+
+     General : Boxplot of the train,validation and test accuracies for each model in models
     
-    INPUT : a 2 by (number of seeds tensor) with in each line the model accuracies
+    INPUT :
+
+        - data : a tensor (nb_models,3,10)
+        - title : title of the boxplot
+        - models : names of the models tested
+        - save : boolean to save the figure
+
+    Output : Boxplot. If only one model  mean and standard deviation are printed
 
     """
 
-    labels = ['Train','Validation', 'Test']
-
-    boxdict1, boxdict2,boxdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2,color='black'),dict(linestyle='-', linewidth=2, color='black')
-    whiskerdict1, whiskerdict2 ,whiskerdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='black'),dict(linestyle='-', linewidth=2, color='black')
+    boxdict1, boxdict2,boxdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2,color='blue'),dict(linestyle='-', linewidth=2, color='gray')
+    whiskerdict1, whiskerdict2 ,whiskerdict3 = dict(linestyle='-', linewidth=2, color='black'), dict(linestyle='-', linewidth=2, color='blue'),dict(linestyle='-', linewidth=2, color='gray')
     mediandict = dict(linestyle='--', linewidth=1.5, color='red')
 
-    fig1, ax1 = plt.subplots(1,1,figsize=(10,7))
+    fig1, ax1 = plt.subplots(1,1,figsize=(12,8))
 
     ax1.set_title(title)
-
-    bplot = ax1.boxplot(data, patch_artist=False, widths = 0.2, showfliers=True, showcaps=False, boxprops=boxdict1, whiskerprops=whiskerdict1, medianprops=mediandict, labels=labels)
     
     np.random.seed(0)
+    p = 0 
+    print(data.shape)
+    for i in range (data.shape[0]) :
+      ax1.boxplot(data[i,0].view(1,-1), patch_artist=False,positions = [p], widths = 0.3, showfliers=True, showcaps=False, boxprops=boxdict1, whiskerprops=whiskerdict1, 
+                      medianprops=mediandict)
+      ax1.boxplot(data[i,1].view(1,-1), patch_artist=False,positions = [p+1], widths = 0.3, showfliers=True, showcaps=False, boxprops=boxdict2, whiskerprops=whiskerdict2, 
+                      medianprops=mediandict)
+      ax1.boxplot(data[i,2].view(1,-1), patch_artist=False,positions = [p+2], widths = 0.3, showfliers=True, showcaps=False, boxprops=boxdict3, whiskerprops=whiskerdict3, 
+                      medianprops=mediandict)
+      ax1.scatter(np.random.normal(p, 0.05, data[i,0].shape[0]), data[i,0], c='red')
+      ax1.scatter(np.random.normal(p+1, 0.05, data[i,1].shape[0]), data[i,1], c='red')
+      ax1.scatter(np.random.normal(p+2, 0.05, data[i,2].shape[0]), data[i,2], c='red')
+      p +=3
     
-    for i in range(3):
-        y = data[i]
-        x = np.random.normal(i+1, 0.04, size=len(y))
-        ax1.plot(x, y, 'r.', alpha=1)
-        
-
+    ax1.set_xticks([k+1.0 for k in range(0,p,3)])
+    ax1.set_xticklabels(labels =models) 
     ax1.yaxis.grid(True)
-    ax1.set_xlabel('')
     ax1.set_ylabel('Accuracy (%)')
-    
-    # mean acc
-    mean_acc_train = torch.mean(data[0])
-    mean_acc_validation = torch.mean(data[1])
-    mean_acc_test = torch.mean(data[2])
-    # std acc
-    std_acc_train = torch.std(data[0])
-    std_acc_validation = torch.std(data[1])
-    std_acc_test = torch.std(data[2])
-    
-    print('Training |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_train, std_acc_train))
-    print('Validation |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_validation, std_acc_validation))
-    print('Test |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_test, std_acc_test))
 
+    labels = ['Train', 'Validation', 'Test']
+    handles = [mpatch.Patch(facecolor='black'), mpatch.Patch(facecolor='blue'),mpatch.Patch(facecolor='gray') ]
+    ax1.legend(handles,labels, loc='best')
+
+    if (save == True) :
+      fig1.savefig('Proj1_Seb_/Figures/performance.png')
+
+    plt.show()
+    
+    if (data.shape[1] == 3) :
+        
+        # mean acc
+        mean_acc_train = torch.mean(data[0,0])
+        mean_acc_validation = torch.mean(data[0,1])
+        mean_acc_test = torch.mean(data[0,2])
+        # std acc
+        std_acc_train = torch.std(data[0,0])
+        std_acc_validation = torch.std(data[0,1])
+        std_acc_test = torch.std(data[0,2])
+
+        print('Training |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_train, std_acc_train))
+        print('Validation |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_validation, std_acc_validation))
+        print('Test |  Mean accuracy: {:.3f} | Standard deviation: {:.3f}\n'.format( mean_acc_test, std_acc_test))
