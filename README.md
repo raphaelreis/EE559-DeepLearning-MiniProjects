@@ -66,6 +66,8 @@ This folder contain all the functions used to train, tune and evaluate a model a
 	
 ### Performances
 
+![alt text](https://github.com/raphaelreis/EE559-DeepLearning-MiniProjects/blob/Seb_/Proj1_Seb_/Figures/Model%20accuracies.png)
+
 ### Contributors
 
 Bernaert Vincent, Emery Sébastien and Reis Raphael 
