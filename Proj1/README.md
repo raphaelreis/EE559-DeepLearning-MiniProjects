@@ -5,9 +5,15 @@ The Goal of this project is to implement different neural network structures to 
 in particular to test the impact of weight sharing and auxiliary losses.
 
 ### Main
-The main.py file contain the executable of our project, it can be called as follows :
-  
+The test.py file contain the executable of our project which can be called without argument under the Proj1 folder.
 
+The output is the boxplot of the train, validation and test accuracies of our best model LeNet_sharing_aux with data augmentation. A PNG file will be saved in the Figures folder under Best_performance.
+
+Note 1 : The code might take a while to run due to the data augmentation  
+
+Note 2 : The code might not be 100% reproducible, it can slightly vary each time we extract and process the MNIST dataset. However,the accuracy will be very close to the one in our report and once extracted it will be reproducible at each call.
+
+Note 3 : Under test_all_models.py, we provide a main to call which train all models and reproduce the whole boxplot. However, it will take a very long time to run.
 ### Data
 The data is taken from the MNIST dataset from Yann Lecun website. The lecturer of the EEE-559 lecture at epfl (Fleuret François) provides a python file (dlc_prologue.py) which generates 
 our dataset. The dataset is structured as follows :
@@ -66,7 +72,7 @@ This folder contain all the functions used to train, tune and evaluate a model a
 	
 ### Performances
 
-![alt text](https://github.com/raphaelreis/EE559-DeepLearning-MiniProjects/blob/Seb_/Proj1_Seb_/Figures/Model%20accuracies.png)
+![alt text](https://github.com/raphaelreis/EE559-DeepLearning-MiniProjects/blob/Seb_/Proj1/Figures/Model%20accuracies.png)
 
 ### Contributors
 
