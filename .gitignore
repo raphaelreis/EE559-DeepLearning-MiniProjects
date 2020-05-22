@@ -130,3 +130,30 @@ dmypy.json
 
 # data folder
 data
+proj2/analysis/loss_history_train_tanh.txt
+proj2/analysis/loss_history_test_tanh.txt
+proj2/analysis/framework_debug.ipynb
+proj2/analysis/accuracy_history_train_tanh.txt
+proj2/analysis/accuracy_history_test_tanh.txt
+proj2/.vscode/settings.json
+proj2/.VSCodeCounter/results.txt
+proj2/.VSCodeCounter/results.md
+proj2/.VSCodeCounter/results.csv
+proj2/.VSCodeCounter/details.md
+proj2/todo.md
+proj2/EE-449-proj2.bib
+proj1/mnist_data/MNIST/raw/train-labels-idx1-ubyte
+proj1/mnist_data/MNIST/raw/train-images-idx3-ubyte.gz
+proj1/mnist_data/MNIST/raw/train-images-idx3-ubyte
+proj1/mnist_data/MNIST/raw/t10k-labels-idx1-ubyte.gz
+proj1/mnist_data/MNIST/raw/t10k-labels-idx1-ubyte
+proj1/mnist_data/MNIST/raw/t10k-images-idx3-ubyte.gz
+proj1/mnist_data/MNIST/raw/t10k-images-idx3-ubyte
+proj1/mnist_data/MNIST/processed/training.pt
+proj1/mnist_data/MNIST/processed/test.pt
+proj1/analysis/mnist.ipynb
+.VSCodeCounter/results.txt
+.VSCodeCounter/results.md
+.VSCodeCounter/results.csv
+.VSCodeCounter/details.md
+toDo.txt
