@@ -5,7 +5,6 @@ The goal of these two miniprojects is to learn state of art deep learning librar
 # Project 1
 
 The objective of this project is to test different architectures to compare two digits visible in a two-channel  mage. It aims at showing in particular the impact of weight sharing, and of the use of an auxiliary loss to help the training of the main objective.
-
 It is implemented with PyTorch only code, in particular without using other external libraries
 such as scikit-learn or numpy
 
