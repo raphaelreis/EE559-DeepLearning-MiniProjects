@@ -5,25 +5,21 @@ tensor operations and the standard math library, hence in particular without usi
 neural-network modules.
 
 
-Please check our report for this project here: [Porject2 report](https://github.com/raphaelreis/EE559-DeepLearning-MiniProjects/blob/master/Proj2/EE559_proj2_report.pdf)
+Please check our report for this project here: [Project2 report](https://github.com/raphaelreis/EE559-DeepLearning-MiniProjects/blob/master/Proj2/EE559_proj2_report.pdf)
 
 ## Getting Started
 
 The project is splitted in five folders:
-* analysis:
-  Notebook analysis and figures
-* data generator
-  The class to generate the data
+* analysis: notebook analysis and figures
+* data generator: a class to generate the data
 * neuralnetworks:
-1. base.py: contains the parent class for all modules
-2. dropout.py: dropout layer
-3. feedforward.py: fully connected layer
-4. functions.py: all the activation and loss functions
-5. sequential.py: high level learning protocol for the deep network to solve classification task
-* optimizer
-  Sochastic gradient descent optimizer
-* test
-  unit testing
+> 1. base.py: contains the parent class for all modules
+> 2. dropout.py: dropout layer
+> 3. feedforward.py: fully connected layer
+> 4. functions.py: all the activation and loss functions
+> 5. sequential.py: high level learning protocol for the deep network to solve classification task
+* optimizer: Sochastic gradient descent optimizer
+* test: unit testing
 
 ### Prerequisites
 
