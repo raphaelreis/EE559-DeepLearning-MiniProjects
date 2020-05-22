@@ -2,6 +2,7 @@ from matplotlib import pyplot as plt
 import sys
 import numpy as np
 sys.path.append('..')
+import matplotlib.patches as mpatch
 import torch
 
 # simple learning curve for visualization of training over epochs
@@ -92,11 +93,11 @@ def boxplot(data,title,models,save = False):
     ax1.legend(handles,labels, loc='best')
 
     if (save == True) :
-      fig1.savefig('Proj1_Seb_/Figures/performance.png')
+      fig1.savefig('Figures/Best_performance.png')
 
     plt.show()
     
-    if (data.shape[1] == 3) :
+    if (len(models) == 1) :
         
         # mean acc
         mean_acc_train = torch.mean(data[0,0])

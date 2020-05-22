@@ -219,7 +219,7 @@ def evaluate_model(Net, seeds, mini_batch_size=100, optimizer = optim.Adam, crit
     if statistics :
         Title = " Models accuracies"
         models = [Net['net_type']]
-        boxplot(data, Title,models)
+        boxplot(data, Title,models,True)
 
     return train_results, torch.tensor(test_losses), torch.tensor(test_accuracies)
 
