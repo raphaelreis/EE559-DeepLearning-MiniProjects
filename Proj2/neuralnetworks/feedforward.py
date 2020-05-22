@@ -57,4 +57,3 @@ class Feedforward(Module):
 def kaimingHe_normal(output_size, input_size):
     std = math.sqrt(2. / (output_size))
     return empty(output_size, input_size).normal_(0., std)
-
