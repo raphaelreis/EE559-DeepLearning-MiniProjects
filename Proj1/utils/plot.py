@@ -43,7 +43,7 @@ def learning_curve(tr_losses, tr_accuracies, valid_losses, valid_accuracies):
     
 # Boxplot
 
-def boxplot(data,title,models,save = False):
+def boxplot(data,title,models,save = False,filename = 'Figures/Best_performance.png'):
 
     """ 
 
@@ -93,7 +93,7 @@ def boxplot(data,title,models,save = False):
     ax1.legend(handles,labels, loc='best')
 
     if (save == True) :
-      fig1.savefig('Figures/Best_performance.png')
+      fig1.savefig(filename)
 
     plt.show()
     

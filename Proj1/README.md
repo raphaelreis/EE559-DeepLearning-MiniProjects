@@ -14,6 +14,8 @@ Note 1 : The code might take a while to run due to the data augmentation
 Note 2 : The code might not be 100% reproducible, it can slightly vary each time we extract and process the MNIST dataset. However,the accuracy will be very close to the one in our report and once extracted it will be reproducible at each call.
 
 Note 3 : Under test_all_models.py, we provide a main to call which train all models and reproduce the whole boxplot. However, it will take a very long time to run.
+
+Not 4 : Grid search performed are not provided int the executable as it will take to long.
 ### Data
 The data is taken from the MNIST dataset from Yann Lecun website. The lecturer of the EEE-559 lecture at epfl (Fleuret François) provides a python file (dlc_prologue.py) which generates 
 our dataset. The dataset is structured as follows :
